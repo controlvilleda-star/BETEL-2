@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Claros Strong</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" data-action="go-tab" data-tab="explorar" aria-label="Ir al inicio">
+          <span class="brand-mark">S</span>
+          <span>
+            <strong>Claros Strong</strong>
+            <small>Concordancia biblica guiada</small>
+          </span>
+        </button>
+
+        <label class="search-box" for="globalSearch">
+          <i data-lucide="search"></i>
+          <input
+            id="globalSearch"
+            type="search"
+            autocomplete="off"
+            placeholder="Buscar amor, G26, shalom, Juan..."
+          />
+          <button class="icon-button ghost" data-action="clear-search" aria-label="Limpiar busqueda">
+            <i data-lucide="x"></i>
+          </button>
+        </label>
+
+        <div class="top-actions" aria-label="Acciones principales">
+          <div class="mode-switch" role="group" aria-label="Modo de lectura">
+            <button class="mode-button active" data-action="set-mode" data-mode="beginner">Simple</button>
+            <button class="mode-button" data-action="set-mode" data-mode="advanced">Avanzado</button>
+          </div>
+          <button class="icon-button" data-action="open-import" aria-label="Importar datos" title="Importar datos">
+            <i data-lucide="upload"></i>
+          </button>
+          <button class="icon-button" data-action="open-export" aria-label="Exportar datos" title="Exportar datos">
+            <i data-lucide="download"></i>
+          </button>
+        </div>
+      </header>
+
+      <nav class="tabbar" aria-label="Secciones">
+        <button class="tab active" data-action="go-tab" data-tab="explorar">
+          <i data-lucide="search-check"></i>
+          Explorar
+        </button>
+        <button class="tab" data-action="go-tab" data-tab="lexico">
+          <i data-lucide="book-open-text"></i>
+          Lexico
+        </button>
+        <button class="tab" data-action="go-tab" data-tab="versiculos">
+          <i data-lucide="pilcrow"></i>
+          Versiculos
+        </button>
+        <button class="tab" data-action="go-tab" data-tab="escuela">
+          <i data-lucide="calendar-days"></i>
+          Escuela
+        </button>
+        <button class="tab" data-action="go-tab" data-tab="guardados">
+          <i data-lucide="bookmark"></i>
+          Guardados
+        </button>
+        <button class="tab" data-action="go-tab" data-tab="aprender">
+          <i data-lucide="graduation-cap"></i>
+          Aprender
+        </button>
+      </nav>
+
+      <main class="workspace">
+        <aside class="sidebar">
+          <section class="side-block">
+            <div class="side-title">
+              <span>Ruta inicial</span>
+              <i data-lucide="map"></i>
+            </div>
+            <ol class="study-path">
+              <li>
+                <span>1</span>
+                <p>Observa la palabra espanola y el numero Strong que la acompana.</p>
+              </li>
+              <li>
+                <span>2</span>
+                <p>Mira la palabra original, su idea central y sus usos cercanos.</p>
+              </li>
+              <li>
+                <span>3</span>
+                <p>Lee varios ejemplos antes de sacar una conclusion teologica.</p>
+              </li>
+            </ol>
+          </section>
+
+          <section class="side-block compact">
+            <div class="side-title">
+              <span>Corpus local</span>
+              <i data-lucide="database"></i>
+            </div>
+            <div id="stats" class="stats-grid"></div>
+          </section>
+
+          <section class="side-block compact">
+            <div class="side-title">
+              <span>Filtros</span>
+              <i data-lucide="sliders-horizontal"></i>
+            </div>
+            <div class="filter-stack">
+              <label>
+                Idioma
+                <select id="languageFilter">
+                  <option value="all">Todos</option>
+                  <option value="Griego">Griego</option>
+                  <option value="Hebreo">Hebreo</option>
+                </select>
+              </label>
+              <label>
+                Testamento
+                <select id="testamentFilter">
+                  <option value="all">Todos</option>
+                  <option value="AT">Antiguo</option>
+                  <option value="NT">Nuevo</option>
+                </select>
+              </label>
+            </div>
+          </section>
+        </aside>
+
+        <section id="screen" class="screen" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <dialog id="dataDialog" class="data-dialog">
+      <form method="dialog" class="dialog-inner">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow" id="dialogEyebrow">Datos</p>
+            <h2 id="dialogTitle">Importar corpus</h2>
+          </div>
+          <button class="icon-button ghost" value="cancel" aria-label="Cerrar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <textarea id="dataTextarea" spellcheck="false"></textarea>
+        <div class="dialog-actions">
+          <p id="dialogMessage" class="dialog-message"></p>
+          <button type="button" class="secondary-button" data-action="reset-data">
+            Restaurar muestra
+          </button>
+          <button type="button" class="primary-button" id="dialogPrimary">
+            Aplicar
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
