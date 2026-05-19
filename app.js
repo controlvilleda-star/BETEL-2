@@ -1182,10 +1182,10 @@ const sabbathSchool = {
     "La fe muestra la realidad de lo que esperamos; es evidencia de lo que no vemos.",
   memoryStrong: ["G4102", "G5287", "G1680", "G1650", "G991", "G4229"],
   egwFocus: {
-    reference: "Ellen G. White, Early Writings, p. 72",
-    quote: "Faith is not feeling; faith is not sight.",
-    note:
-      "La cita conecta directamente con el enfasis del martes: la fe se apoya en la promesa de Dios, no en la sensacion del momento.",
+    reference: "Elena G. de White, Primeros Escritos, p. 72",
+    quote: "No debemos buscar que nuestros corazones se llenen de emoción antes de creer que Dios nos oye; el sentimiento no debe ser nuestro criterio, porque las emociones son tan variables como las nubes. Debemos tener una base sólida para nuestra fe. La fe no es el sentimiento; la fe no es la vista. Es descansar en las promesas de Dios, sabiendo que Él es fiel.",
+    note: "La cita conecta directamente con el énfasis del martes: la fe se apoya en la promesa de Dios, no en la sensación del momento.",
+    link: "https://m.egwwritings.org/es/book/132.327"
   },
   days: [
     {
@@ -1257,57 +1257,66 @@ const sabbathSchool = {
 const egwThemes = [
   {
     keys: ["fe", "confianza", "creer", "evidencia", "realidad", "ver"],
-    reference: "Ellen G. White, Early Writings, p. 72",
-    quote: "Faith is not feeling; faith is not sight.",
+    reference: "Elena G. de White, Primeros Escritos, p. 72",
+    quote: "La fe no es el sentimiento. 'La fe es la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven'. [...] La fe no es el sentimiento; la fe no es la vista. Nos corresponde a nosotros ejercer fe. Debemos creer a Dios porque Él lo ha dicho.",
     note: "Relaciona esta palabra con una confianza que se aferra a la promesa de Dios.",
+    link: "https://m.egwwritings.org/es/book/132.327"
   },
   {
     keys: ["oracion", "dependencia"],
-    reference: "Ellen G. White, Steps to Christ, p. 93",
-    quote: "Prayer is the opening of the heart to God.",
+    reference: "Elena G. de White, El Camino a Cristo, p. 93",
+    quote: "Orar es el acto de abrir nuestro corazón a Dios como a un amigo. No es que se necesite esto para que Dios sepa lo que somos, sino a fin de capacitarnos para recibirle. La oración no baja a Dios hacia nosotros, sino que nos eleva a Él.",
     note: "Usa esta referencia cuando la palabra apunte a comunion y dependencia.",
+    link: "https://m.egwwritings.org/es/book/146.438"
   },
   {
     keys: ["palabra", "ensenanza", "ley", "instruccion", "mensaje"],
-    reference: "Ellen G. White, Christ's Object Lessons, p. 37",
-    quote: "The word of God is the seed.",
+    reference: "Elena G. de White, Palabras de Vida del Gran Maestro, p. 24",
+    quote: "La palabra de Dios es la semilla. Cada semilla tiene en sí misma un principio germinativo. En ella está encerrada la vida de la planta. Así hay vida en la palabra de Dios. Cristo dice: 'Las palabras que yo os he hablado son espíritu y son vida'.",
     note: "Conecta el termino con Escritura que produce vida y fruto.",
+    link: "https://m.egwwritings.org/es/book/165.114"
   },
   {
     keys: ["cristo", "jesus", "hijo", "salvacion", "salvar", "gracia"],
-    reference: "Ellen G. White, Steps to Christ, p. 21",
-    quote: "Christ is the ladder that Jacob saw.",
+    reference: "Elena G. de White, El Camino a Cristo, p. 21",
+    quote: "Cristo es la escalera que vio Jacob, cuya base descansaba en la tierra y cuya cima llegaba al cielo, hasta la misma presencia de Dios. Si esa escalera no hubiera llegado a la tierra y le hubiera faltado un solo peldaño, nos habríamos perdido.",
     note: "Relaciona la palabra con Cristo como centro de la salvacion.",
+    link: "https://m.egwwritings.org/es/book/146.68"
   },
   {
     keys: ["amor", "misericordia", "pacto", "bondad"],
-    reference: "Ellen G. White, The Desire of Ages, p. 22",
-    quote: "The law of love is the foundation.",
+    reference: "Elena G. de White, El Deseado de Todas las Gentes, p. 11",
+    quote: "La ley del amor es el fundamento del gobierno de Dios en los cielos y en la tierra. Dios es amor... Su naturaleza, su ley, son amor. Así ha sido siempre; así será para siempre.",
     note: "Lee el termino dentro del caracter amoroso de Dios.",
+    link: "https://m.egwwritings.org/es/book/125.17"
   },
   {
     keys: ["paz", "gozo", "espiritu", "vida", "eterno"],
-    reference: "Ellen G. White, The Desire of Ages, p. 331",
-    quote: "In the heart of Christ... perfect peace.",
+    reference: "Elena G. de White, El Deseado de Todas las Gentes, p. 301",
+    quote: "En el corazón de Cristo, donde reinaba perfecta armonía con Dios, había perfecta paz. Nunca se dejaba eludir por los aplausos ni deprimir por la censura o el chasco.",
     note: "Ayuda a ver paz y vida como fruto de permanecer en Cristo.",
+    link: "https://m.egwwritings.org/es/book/125.1384"
   },
   {
     keys: ["iglesia", "comunion", "comunidad"],
-    reference: "Ellen G. White, Christ's Object Lessons, p. 69",
-    quote: "Christ is waiting with longing desire.",
+    reference: "Elena G. de White, Palabras de Vida del Gran Maestro, p. 47",
+    quote: "Cristo espera con un deseo anhelante la manifestación de sí mismo en su iglesia. Cuando el carácter de Cristo sea perfectamente reproducido en su pueblo, entonces vendrá él a reclamarlos como suyos.",
     note: "Conecta la palabra con una comunidad que revela el caracter de Cristo.",
+    link: "https://m.egwwritings.org/es/book/165.318"
   },
   {
     keys: ["justicia", "justificar", "rey", "senor", "Dios", "YHWH"],
-    reference: "Ellen G. White, Patriarchs and Prophets, p. 34",
-    quote: "The law of love being the foundation.",
+    reference: "Elena G. de White, Patriarcas y Profetas, p. 12",
+    quote: "Puesto que la ley del amor es el fundamento del gobierno de Dios, la felicidad de todos los seres inteligentes depende de su perfecto acuerdo con sus grandes principios de justicia.",
     note: "Usa esta referencia para gobierno, justicia y caracter de Dios.",
+    link: "https://m.egwwritings.org/es/book/167.35"
   },
   {
     keys: ["crear", "creacion", "cielos", "tierra", "principio", "bueno"],
-    reference: "Ellen G. White, Patriarchs and Prophets, p. 44",
-    quote: "The earth came forth from the hand of its Maker.",
+    reference: "Elena G. de White, Patriarcas y Profetas, p. 24",
+    quote: "La tierra salió de las manos de su Hacedor en forma sumamente hermosa. Había montañas, colinas y llanuras, entrelazadas con majestuosos ríos y hermosos lagos.",
     note: "Relaciona la palabra con la creacion como obra buena de Dios.",
+    link: "https://m.egwwritings.org/es/book/167.92"
   },
 ];
 
@@ -1726,10 +1735,16 @@ function renderEgwBox(entry) {
     <div class="egw-box">
       <div class="egw-head">
         <span>
-          <strong>Ellen G. White</strong>
+          <strong>Elena G. de White</strong>
           <small>${escapeHtml(egw.reference)}</small>
         </span>
-        <i data-lucide="quote"></i>
+        ${
+          egw.link
+            ? `<a href="${escapeHtml(egw.link)}" target="_blank" rel="noopener noreferrer" class="icon-button ghost" style="min-height:24px;width:24px;height:24px;padding:0;" title="Leer párrafo completo">
+                 <i data-lucide="external-link" style="width:14px;height:14px"></i>
+               </a>`
+            : `<i data-lucide="quote"></i>`
+        }
       </div>
       <p class="egw-quote">"${escapeHtml(egw.quote)}"</p>
       <p class="muted">${escapeHtml(egw.note)}</p>
@@ -1826,7 +1841,16 @@ function renderSchool() {
               <p class="muted">Lectura sugerida: ${escapeHtml(today.reading)}</p>
             </div>
             <div class="egw-mini">
-              <strong>${escapeHtml(sabbathSchool.egwFocus.reference)}</strong>
+              <div class="row-top">
+                <strong>${escapeHtml(sabbathSchool.egwFocus.reference)}</strong>
+                ${
+                  sabbathSchool.egwFocus.link
+                    ? `<a href="${escapeHtml(sabbathSchool.egwFocus.link)}" target="_blank" rel="noopener noreferrer" class="icon-button ghost" style="min-height:24px;width:24px;height:24px;padding:0;" title="Leer párrafo completo">
+                         <i data-lucide="external-link" style="width:14px;height:14px"></i>
+                       </a>`
+                    : ``
+                }
+              </div>
               <p>"${escapeHtml(sabbathSchool.egwFocus.quote)}"</p>
               <span>${escapeHtml(sabbathSchool.egwFocus.note)}</span>
             </div>
@@ -2340,17 +2364,32 @@ function formatDateKey(date) {
   return `${year}-${month}-${day}`;
 }
 
-function drawSchoolShareCard(forceVariant = false) {
+async function drawSchoolShareCard(forceVariant = false) {
   const canvas = document.querySelector("#shareCanvas");
   if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
   const day = getTodaySchoolDay();
-  const seed = hashText(`${day.date}-${day.title}-${forceVariant ? Date.now() : "stable"}`);
   const width = canvas.width;
   const height = canvas.height;
 
-  drawGenerativeBackdrop(ctx, width, height, seed);
+  const img = new Image();
+  img.src = "./clay-bg.png";
+  await new Promise((resolve) => {
+    img.onload = resolve;
+    img.onerror = () => {
+      drawGenerativeBackdrop(ctx, width, height, hashText(`${day.date}-${day.title}`));
+      resolve();
+    };
+  });
+
+  if (img.complete && img.naturalWidth > 0) {
+    const scale = Math.max(width / img.width, height / img.height);
+    const x = (width / 2) - (img.width / 2) * scale;
+    const y = (height / 2) - (img.height / 2) * scale;
+    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+  }
+
   ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
   roundRect(ctx, 76, 88, width - 152, height - 176, 34);
   ctx.fill();
@@ -2397,7 +2436,7 @@ function drawSchoolShareCard(forceVariant = false) {
   ctx.fillStyle = "#66756e";
   ctx.font = "500 22px Inter, Segoe UI, sans-serif";
   ctx.fillText("Generado por Claros Strong", 126, 1238);
-  ctx.fillText("Ellen G. White: Early Writings, p. 72", 126, 1272);
+  ctx.fillText("Elena G. de White: Primeros Escritos, p. 72", 126, 1272);
 }
 
 function drawGenerativeBackdrop(ctx, width, height, seed) {
