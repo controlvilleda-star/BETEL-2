@@ -386,16 +386,16 @@
       });
       
       document.querySelectorAll('.verse').forEach(v => {
-        v.innerHTML += ' (RV1909)';
+        v.innerHTML += ' <span style="font-size:0.9em">🔊</span>';
         v.classList.add('highlight-pastel');
         v.style.setProperty('--highlight-color', 'rgba(253, 224, 71, 0.6)');
-        v.title = "Haz clic para interactuar";
+        v.title = "Haz clic para leer y escuchar";
       });
 
       contentBox.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('verse')) {
+        if (e.target.closest('.verse')) {
           e.preventDefault();
-          const verseLink = e.target;
+          const verseLink = e.target.closest('.verse');
           
           if (verseLink.nextElementSibling && verseLink.nextElementSibling.classList.contains('verse-box')) {
             verseLink.nextElementSibling.remove();
@@ -403,7 +403,7 @@
           }
           
           const rawText = verseLink.innerText;
-          const query = rawText.replace(' (RV1909)', '').replace(/ al /gi, '-').replace(/ y /gi, ',');
+          const query = rawText.replace(' 🔊', '').replace(/ al /gi, '-').replace(/ y /gi, ',');
           
           const box = document.createElement('div');
           box.className = 'verse-box';
@@ -419,17 +419,23 @@
             
             const temp = document.createElement('div');
             temp.innerHTML = data.contents;
-            const passage = temp.querySelector('.passage-text');
+            const passage = temp.querySelector('.passage-content') || temp.querySelector('.passage-text');
             
             if (passage) {
               passage.querySelectorAll('sup, .crossreference, .footnote, h1, h2, h3').forEach(el => el.remove());
-              const text = passage.innerText.replace(/\s+/g, ' ').trim();
+              let text = passage.innerText.replace(/\s+/g, ' ').trim();
+              text = text.replace(/Read full chapter/gi, '').trim();
+              
+              const safeText = text.replace(/'/g, "\\'").replace(/"/g, '');
               
               box.innerHTML = `
-                <p class="verse-text">«${text}»</p>
+                <p class="verse-text" onclick="speakText(this, '${safeText}')" title="Toca para escuchar" style="cursor:pointer;">
+                  <span class="highlight-pastel" style="--highlight-color: rgba(253, 186, 116, 0.5); background-size: 100% 100%;">
+                    «${text}»
+                  </span>
+                </p>
                 <div class="verse-actions">
-                  <button class="verse-btn" onclick="speakText(this, '${text.replace(/'/g, "\\'").replace(/"/g, '')}')">🔊 Escuchar (RV1909)</button>
-                  <button class="verse-btn primary" onclick="handleShare('${text.replace(/'/g, "\\'").replace(/"/g, '')}')">📲 Compartir Imagen</button>
+                  <button class="verse-btn primary" onclick="handleShare('${safeText}')">📲 Compartir Imagen</button>
                 </div>
               `;
             } else {
@@ -447,33 +453,29 @@
 
     // Funciones Text-To-Speech
     window.currentUtterance = null;
-    function speakText(btn, text) {
+    function speakText(element, text) {
       const synth = window.speechSynthesis;
       if (synth.speaking) {
         synth.cancel();
-        document.querySelectorAll('.verse-btn.playing').forEach(b => {
-          b.classList.remove('playing');
-          b.innerHTML = '🔊 Escuchar (RV1909)';
-        });
+        // Remove animation if we add one
         if (window.currentUtterance && window.currentUtterance.text === text) {
           window.currentUtterance = null;
+          element.style.opacity = '1';
           return; // Stop playback
         }
       }
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'es-ES';
-      utterance.rate = 0.95; // Ligero ajuste para sonar más pausado y reflexivo
+      utterance.rate = 0.95; 
       
       utterance.onend = () => {
-        btn.classList.remove('playing');
-        btn.innerHTML = '🔊 Escuchar (RV1909)';
         window.currentUtterance = null;
+        element.style.opacity = '1';
       };
       
       window.currentUtterance = utterance;
-      btn.classList.add('playing');
-      btn.innerHTML = '⏸️ Detener Lectura';
+      element.style.opacity = '0.7'; // Indicador visual de que está leyendo
       synth.speak(utterance);
     }
 
