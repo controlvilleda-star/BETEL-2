@@ -6,7 +6,6 @@
   <title>Lección Diaria</title>
   <link rel="stylesheet" href="./styles.css" />
   <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="./app.js"></script>
   
   <style>
     body {
@@ -31,6 +30,7 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.04);
       padding: 32px;
       border: 1px solid var(--line);
+      position: relative;
     }
     
     .lang-switcher {
@@ -70,19 +70,12 @@
     }
 
     .lesson-title {
-      color: #9c4122; /* Un rojo/terracota que encaja con el estilo cálido */
+      color: #9c4122;
       font-size: 1.8rem;
       font-weight: 800;
       margin: 0 0 24px 0;
       text-transform: uppercase;
       letter-spacing: -0.5px;
-    }
-
-    .reading-text {
-      font-size: 1.1rem;
-      line-height: 1.65;
-      color: var(--ink);
-      margin-bottom: 20px;
     }
 
     .inter-image {
@@ -98,91 +91,75 @@
       height: auto;
       display: block;
       object-fit: cover;
-      max-height: 280px;
+      max-height: 350px;
     }
 
-    .bible-reading {
-      margin: 32px 0;
-      padding-left: 20px;
-      border-left: 3px solid #9c4122;
-      font-family: Georgia, "Times New Roman", serif;
+    /* Estilos dinámicos para el contenido de Adventech */
+    .sabbath-content {
+      font-size: 1.1rem;
+      line-height: 1.65;
+      color: var(--ink);
     }
     
-    .bible-reading h4 {
-      margin: 0 0 12px 0;
-      font-size: 1.05rem;
+    .sabbath-content p {
+      margin-bottom: 20px;
+    }
+    
+    .sabbath-content h3 {
+      font-size: 1.25rem;
       color: #9c4122;
-      font-family: Inter, sans-serif;
-      text-decoration: underline;
-      text-underline-offset: 3px;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-
-    .bible-reading p {
-      font-size: 1.15rem;
-      line-height: 1.6;
-      color: #b33914;
-      font-style: italic;
-      margin: 0 0 12px 0;
-    }
-
-    .bible-meta {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-style: normal;
-      font-family: Inter, sans-serif;
-    }
-
-    .egw-reading {
+    
+    .sabbath-content blockquote {
       margin: 32px 0;
       padding: 20px;
       background: var(--surface);
       border-radius: var(--radius);
       border-left: 4px solid #0f766e;
     }
-
-    .egw-reading p {
+    
+    .sabbath-content blockquote p {
       font-size: 1.05rem;
-      line-height: 1.6;
       color: #0f766e;
-      margin: 0 0 12px 0;
+      margin-bottom: 12px;
       font-family: Inter, sans-serif;
     }
-
-    .egw-reading span {
-      display: block;
-      font-size: 0.9rem;
+    
+    .sabbath-content blockquote p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .sabbath-content .verse {
+      color: #b33914;
       font-weight: 600;
-      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(179, 57, 20, 0.4);
+      text-underline-offset: 3px;
     }
 
-    .memory-block {
-      background: var(--surface-warm);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 32px;
-      border: 1px dashed var(--gold);
-      text-align: center;
-    }
-    .memory-block h3 {
-      color: var(--gold);
-      font-size: 0.85rem;
-      margin: 0 0 8px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .memory-block p {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 1.1rem;
-      color: #3b2a10;
-      margin: 0 0 8px 0;
-      font-style: italic;
-    }
-    .memory-block span {
-      font-size: 0.85rem;
-      font-weight: 600;
+    /* Loading state */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
       color: var(--muted);
     }
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.1);
+      border-left-color: var(--gold);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -200,23 +177,17 @@
   </script>
   <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <div class="widget-container" id="widget-root"></div>
+  <div class="widget-container" id="widget-root">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Cargando la lección de hoy...</p>
+    </div>
+  </div>
 
   <script>
-    const bibleTexts = {
-      "Hebreos 11:1": "Es pues la fe la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven.",
-      "Romanos 1:17; 2 Corintios 5:7": "Porque en él la justicia de Dios se descubre de fe en fe; como está escrito: Mas el justo vivirá por la fe. (Rom 1:17)<br><br>(Porque por fe andamos, no por vista;) (2 Cor 5:7)",
-      "Marcos 9:14-29": "Y Jesús le dijo: Si puedes creer, al que cree todo es posible. Y luego el padre del muchacho, llorando y clamando, dijo: Creo, ayuda mi incredulidad.",
-      "Hebreos 11:1; Early Writings, p. 72": "Es pues la fe la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven.",
-      "Santiago 2:17-18; Hebreos 11": "Así también la fe, si no tuviere obras, es muerta en sí misma. Pero alguno dirá: Tú tienes fe, y yo tengo obras: muéstrame tu fe sin tus obras, y yo te mostraré mi fe por mis obras.",
-      "Hebreos 11:8; Genesis 12:1-4": "EMPERO Jehová había dicho á Abram: Vete de tu tierra y de tu parentela, y de la casa de tu padre, á la tierra que te mostraré. (Gen 12:1)<br><br>Por la fe Abraham, siendo llamado, obedeció para salir al lugar que había de recibir por heredad; y salió sin saber dónde iba. (Heb 11:8)",
-      "Hebreos 11; Ellen G. White, Early Writings, p. 72": "Es pues la fe la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven. Porque por ella alcanzaron testimonio los antiguos.",
-      "Hebreos 11": "Es pues la fe la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven. Porque por ella alcanzaron testimonio los antiguos."
-    };
-
     function changeLanguage(langCode, btn) {
       document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      if(btn) btn.classList.add('active');
 
       const select = document.querySelector('.goog-te-combo');
       if (select) {
@@ -225,22 +196,91 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const day = getTodaySchoolDay();
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+          }[tag] || tag)
+      );
+    }
+
+    async function loadAdventechData() {
+      try {
+        const parseDate = (dStr) => {
+          const parts = dStr.split('/');
+          return new Date(parts[2], parts[1] - 1, parts[0]);
+        };
+        
+        // 1. Obtener listado de trimestres
+        const qRes = await fetch("https://sabbath-school.adventech.io/api/v2/es/quarterlies/index.json");
+        const quarters = await qRes.json();
+        const currentQ = quarters[0]; // El actual siempre es el primero
+        
+        // 2. Obtener detalles del trimestre (lecciones)
+        const lRes = await fetch(currentQ.full_path + "/index.json");
+        const qDetail = await lRes.json();
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        // 3. Buscar la lección de esta semana
+        let currentLesson = qDetail.lessons[qDetail.lessons.length - 1];
+        for (const lesson of qDetail.lessons) {
+          if (today >= parseDate(lesson.start_date) && today <= parseDate(lesson.end_date)) {
+            currentLesson = lesson;
+            break;
+          }
+        }
+        
+        // 4. Obtener los días de esa lección
+        const dRes = await fetch(currentLesson.full_path + "/index.json");
+        const lDetail = await dRes.json();
+        
+        const d = String(today.getDate()).padStart(2, '0');
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const y = today.getFullYear();
+        const todayStr = `${d}/${m}/${y}`;
+        
+        // 5. Encontrar el día exacto de hoy
+        let currentDay = lDetail.days.find(day => day.date === todayStr);
+        if (!currentDay) currentDay = lDetail.days[0];
+        
+        // 6. Obtener el contenido del día
+        const readRes = await fetch(currentDay.full_read_path + "/index.json");
+        const readDetail = await readRes.json();
+
+        renderWidget(currentQ, currentLesson, currentDay, readDetail);
+      } catch (err) {
+        document.getElementById("widget-root").innerHTML = `
+          <div style="padding: 20px; text-align: center; color: #9c4122;">
+            <h3>No pudimos cargar la lección de hoy</h3>
+            <p>Verifica tu conexión a internet e intenta de nuevo.</p>
+          </div>
+        `;
+        console.error(err);
+      }
+    }
+
+    function renderWidget(quarter, lesson, day, read) {
       const root = document.getElementById("widget-root");
       
-      const bibleText = bibleTexts[day.reading] || "Texto bíblico completo disponible en tu Biblia.";
-
-      // Formatear la fecha
-      const dateParts = day.date.split('-');
-      const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const dateParts = day.date.split('/');
+      const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
       const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
-      // Dividir el resumen en 2 parrafos
-      const sentences = day.summary.split(/(?<=\.)\s+/);
-      const half = Math.ceil(sentences.length / 2);
-      const p1 = sentences.slice(0, half).join(' ');
-      const p2 = sentences.slice(half).join(' ');
+      // Inyectar la imagen después del primer párrafo
+      let contentHtml = read.content;
+      const imgHtml = `
+        <div class="inter-image">
+          <img src="${lesson.cover}" alt="Imagen de la Lección de esta Semana">
+        </div>
+      `;
+      contentHtml = contentHtml.replace('</p>', '</p>' + imgHtml);
 
       root.innerHTML = `
         <div class="lang-switcher" translate="no">
@@ -250,46 +290,16 @@
           <button class="lang-btn" onclick="changeLanguage('ca', this)">🏴 CA</button>
         </div>
 
-        <div class="memory-block">
-          <h3>Versículo para Memorizar</h3>
-          <p>"${escapeHtml(sabbathSchool.memoryText)}"</p>
-          <span>— ${escapeHtml(sabbathSchool.memoryRef)}</span>
-        </div>
-
         <div class="date-header">${escapeHtml(formattedDate)}</div>
-        <h1 class="lesson-title">${escapeHtml(sabbathSchool.title)}: ${escapeHtml(day.title)}</h1>
+        <h1 class="lesson-title">${escapeHtml(day.title)}</h1>
         
-        <p class="reading-text">${escapeHtml(p1)}</p>
-        
-        <div class="inter-image">
-          <img src="./clay-bg.png" alt="Concepto visual">
-        </div>
-        
-        ${p2 ? `<p class="reading-text">${escapeHtml(p2)}</p>` : ''}
-        
-        <div class="bible-reading">
-          <h4>Lee ${escapeHtml(day.reading)}</h4>
-          <p>${bibleText}</p>
-          <span class="bible-meta" translate="no">Reina Valera Antigua (RV1909)</span>
-        </div>
-        
-        <div class="egw-reading">
-          <p>«${escapeHtml(sabbathSchool.egwFocus.quote)}»</p>
-          <span>${escapeHtml(sabbathSchool.egwFocus.reference)}</span>
-          ${
-            sabbathSchool.egwFocus.link
-              ? `<a href="${escapeHtml(sabbathSchool.egwFocus.link)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:4px; margin-top:8px; font-size:0.85rem; color:#0f766e; text-decoration:none;">
-                   Leer completo <i data-lucide="external-link" style="width:14px;height:14px"></i>
-                 </a>`
-              : ``
-          }
+        <div class="sabbath-content">
+          ${contentHtml}
         </div>
       `;
+    }
 
-      if (window.lucide) {
-        window.lucide.createIcons();
-      }
-    });
+    document.addEventListener("DOMContentLoaded", loadAdventechData);
   </script>
 </body>
 </html>
