@@ -95,7 +95,6 @@
       max-height: 350px;
     }
 
-    /* Estilos dinámicos para el contenido de Adventech */
     .sabbath-content {
       font-size: 1.1rem;
       line-height: 1.65;
@@ -134,15 +133,6 @@
       margin-bottom: 0;
     }
     
-    .sabbath-content .verse {
-      color: #b33914;
-      font-weight: 600;
-      text-decoration: underline;
-      text-decoration-color: rgba(179, 57, 20, 0.4);
-      text-underline-offset: 3px;
-    }
-
-    /* Loading state */
     .loader {
       display: flex;
       flex-direction: column;
@@ -161,11 +151,49 @@
       margin-bottom: 16px;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+      z-index: 99999; padding: 20px; box-sizing: border-box; backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: white; padding: 28px; border-radius: 16px; width: 100%; max-width: 380px;
+      position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center;
+    }
+    .modal-close {
+      position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 28px; cursor: pointer; color: var(--muted);
+    }
+    .modal-btn {
+      display: block; width: 100%; padding: 14px; margin-bottom: 12px;
+      background: var(--surface-warm); border: 1px solid var(--line); border-radius: 8px;
+      font-weight: 600; font-size: 1rem; color: var(--ink); cursor: pointer;
+      text-align: center; text-decoration: none; box-sizing: border-box; transition: 0.2s;
+    }
+    .modal-btn:hover { background: var(--line); }
+    .modal-btn.primary {
+      background: #0f766e; color: white; border-color: #0f766e;
+    }
+    .modal-btn.primary:hover { background: #0d615b; }
+    .preview-img {
+      width: 100%; border-radius: 8px; margin-top: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line);
+    }
+    .modal-title { margin-top: 0; margin-bottom: 20px; font-size: 1.25rem; color: #9c4122; }
   </style>
 </head>
 <body>
   <!-- Contenedor oculto de Google Translate -->
   <div id="google_translate_element" style="display:none;"></div>
+
+  <!-- Modal para Acciones de Cita -->
+  <div id="action-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <h3 class="modal-title">¿Qué deseas hacer?</h3>
+      <div id="modal-body"></div>
+    </div>
+  </div>
 
   <script type="text/javascript">
     function googleTranslateElementInit() {
@@ -217,19 +245,16 @@
           return new Date(parts[2], parts[1] - 1, parts[0]);
         };
         
-        // 1. Obtener listado de trimestres
         const qRes = await fetch("https://sabbath-school.adventech.io/api/v2/es/quarterlies/index.json");
         const quarters = await qRes.json();
-        const currentQ = quarters[0]; // El actual siempre es el primero
+        const currentQ = quarters[0];
         
-        // 2. Obtener detalles del trimestre (lecciones)
         const lRes = await fetch(currentQ.full_path + "/index.json");
         const qDetail = await lRes.json();
         
         const today = new Date();
         today.setHours(0,0,0,0);
         
-        // 3. Buscar la lección de esta semana
         let currentLesson = qDetail.lessons[qDetail.lessons.length - 1];
         for (const lesson of qDetail.lessons) {
           if (today >= parseDate(lesson.start_date) && today <= parseDate(lesson.end_date)) {
@@ -238,7 +263,6 @@
           }
         }
         
-        // 4. Obtener los días de esa lección
         const dRes = await fetch(currentLesson.full_path + "/index.json");
         const lDetail = await dRes.json();
         
@@ -247,11 +271,9 @@
         const y = today.getFullYear();
         const todayStr = `${d}/${m}/${y}`;
         
-        // 5. Encontrar el día exacto de hoy
         let currentDay = lDetail.days.find(day => day.date === todayStr);
         if (!currentDay) currentDay = lDetail.days[0];
         
-        // 6. Obtener el contenido del día
         const readRes = await fetch(currentDay.full_read_path + "/index.json");
         const readDetail = await readRes.json();
 
@@ -274,7 +296,6 @@
       const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
       const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
-      // Inyectar la imagen después del primer párrafo
       let contentHtml = read.content;
       const imgHtml = `
         <div class="inter-image">
@@ -317,30 +338,18 @@
             text-decoration: none;
             border-bottom: 2px solid #b33914;
             color: #b33914;
+            font-weight: 600;
           }
         </style>
       `;
 
-      // Resaltador de palabras clave por categorías de colores
       const contentBox = document.getElementById('sabbath-content-box');
       
       const categoryColors = [
-        { 
-          color: "rgba(253, 224, 71, 0.6)", // Amarillo (Gracia, Santuario)
-          keys: ["gracia", "salvación", "santuario", "justicia"] 
-        },
-        { 
-          color: "rgba(167, 243, 208, 0.7)", // Verde menta (Deidad)
-          keys: ["jesús", "cristo", "dios", "espíritu", "señor"] 
-        },
-        { 
-          color: "rgba(191, 219, 254, 0.7)", // Azul claro (Ley, Pacto)
-          keys: ["sábado", "pacto", "ley", "mandamiento", "profecía"] 
-        },
-        { 
-          color: "rgba(254, 205, 211, 0.7)", // Rosa suave (Virtudes)
-          keys: ["fe", "esperanza", "amor", "paz", "perdón"] 
-        }
+        { color: "rgba(253, 224, 71, 0.6)", keys: ["gracia", "salvación", "santuario", "justicia"] },
+        { color: "rgba(167, 243, 208, 0.7)", keys: ["jesús", "cristo", "dios", "espíritu", "señor"] },
+        { color: "rgba(191, 219, 254, 0.7)", keys: ["sábado", "pacto", "ley", "mandamiento", "profecía"] },
+        { color: "rgba(254, 205, 211, 0.7)", keys: ["fe", "esperanza", "amor", "paz", "perdón"] }
       ];
       
       const walker = document.createTreeWalker(contentBox, NodeFilter.SHOW_TEXT, null, false);
@@ -356,19 +365,15 @@
         
         let newHtml = text.replace(sentenceRegex, (sentence) => {
           const lower = sentence.toLowerCase();
-          
-          // Encontrar qué categoría hace match primero
           let matchedColor = null;
           for (const cat of categoryColors) {
             if (cat.keys.some(kw => lower.includes(kw))) {
-              matchedColor = cat.color;
-              break;
+              matchedColor = cat.color; break;
             }
           }
-          
           if (matchedColor) {
             modified = true;
-            return `<span class="highlight-pastel" style="--highlight-color: ${matchedColor}" title="Haz clic para compartir en WhatsApp">${sentence}</span>`;
+            return `<span class="highlight-pastel" style="--highlight-color: ${matchedColor}" title="Haz clic para interactuar">${sentence}</span>`;
           }
           return sentence;
         });
@@ -380,108 +385,140 @@
         }
       });
       
-      // Agregar indicación RV1909 a los versículos y darles un color por defecto (amarillo intenso)
       document.querySelectorAll('.verse').forEach(v => {
         v.innerHTML += ' (RV1909)';
         v.classList.add('highlight-pastel');
         v.style.setProperty('--highlight-color', 'rgba(253, 224, 71, 0.6)');
-        v.title = "Haz clic para compartir el versículo en WhatsApp";
+        v.title = "Haz clic para interactuar";
       });
 
-      // Lógica de compartición Canvas -> WhatsApp
-      contentBox.addEventListener('click', async (e) => {
+      contentBox.addEventListener('click', (e) => {
         if (e.target.classList.contains('highlight-pastel') || e.target.classList.contains('verse')) {
-          const textToShare = e.target.innerText.replace(' (RV1909)', '');
-          const originalSize = e.target.style.backgroundSize;
-          e.target.style.backgroundSize = '100% 100%'; // feedback visual
-          await shareTextAsImage(textToShare);
-          setTimeout(() => { e.target.style.backgroundSize = originalSize; }, 500);
+          const isVerse = e.target.classList.contains('verse');
+          const rawText = e.target.innerText;
+          const textToShare = rawText.replace(' (RV1909)', '');
+          showModal(textToShare, isVerse, rawText);
         }
       });
     }
 
-    async function shareTextAsImage(text) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1920;
-      const ctx = canvas.getContext('2d');
+    // Funciones del Modal
+    function showModal(textToShare, isVerse, rawText) {
+      const modal = document.getElementById('action-modal');
+      const body = document.getElementById('modal-body');
       
-      // Paletas de degradados pastel
-      const pastelGradients = [
-        ['#ffecd2', '#fcb69f'], // Durazno
-        ['#cfd9df', '#e2ebf0'], // Plata/Azul grisáceo
-        ['#a1c4fd', '#c2e9fb'], // Cielo
-        ['#fbc2eb', '#a6c1ee'], // Rosa a lila
-        ['#fdcbf1', '#e6dee9'], // Rosado muy suave
-        ['#a8edea', '#fed6e3'], // Verde menta a rosa
-        ['#e0c3fc', '#8ec5fc'], // Púrpura a azul
-        ['#fdfbfb', '#ebedee'], // Blanco hueso
-        ['#f5f7fa', '#c3cfe2']  // Gris pardo suave
-      ];
-      
-      const gradientColors = pastelGradients[Math.floor(Math.random() * pastelGradients.length)];
-      const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
-      gradient.addColorStop(0, gradientColors[0]);
-      gradient.addColorStop(1, gradientColors[1]);
-      
-      // Fondo degradado
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 1080, 1920);
-      
-      // Comillas doradas (suaves)
-      ctx.fillStyle = 'rgba(178, 138, 80, 0.4)'; // Color --gold con opacidad
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = 'bold 160px Georgia';
-      ctx.fillText('“', 540, 1920 / 2 - 250);
-      
-      // Dibujar texto principal en tono oscuro para legibilidad (var--ink = #17211c)
-      ctx.fillStyle = '#17211c';
-      ctx.font = 'bold 64px Inter, sans-serif';
-      
-      const words = text.split(' ');
-      let line = '';
-      let posY = 1920 / 2 - 150;
-      const lineHeight = 95;
-      const maxWidth = 880;
-      
-      for(let n = 0; n < words.length; n++) {
-        let testLine = line + words[n] + ' ';
-        let metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          ctx.fillText(line, 540, posY);
-          line = words[n] + ' ';
-          posY += lineHeight;
-        } else {
-          line = testLine;
-        }
+      let html = '';
+      if (isVerse) {
+        // Formatear texto para búsqueda: "Mateo 26: 36 al 42" -> "Mateo 26:36-42"
+        let query = rawText.replace(' (RV1909)', '').replace(/ al /gi, '-').replace(/ y /gi, ',');
+        html += `<a href="https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=RVA" target="_blank" class="modal-btn" onclick="closeModal()">📖 Leer Versículo (RV1909)</a>`;
       }
-      ctx.fillText(line, 540, posY);
       
-      // Footer (Firma)
-      ctx.fillStyle = 'rgba(23, 33, 28, 0.6)';
-      ctx.font = '500 36px Inter, sans-serif';
-      ctx.fillText('Escuela Sabática', 540, 1920 - 150);
+      const safeText = textToShare.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      html += `<button class="modal-btn primary" onclick="handleShare('${safeText}')">📲 Generar Imagen para Estado</button>`;
       
-      // Crear blob y compartir
-      canvas.toBlob(async (blob) => {
+      body.innerHTML = html;
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('action-modal').style.display = 'none';
+    }
+
+    async function handleShare(text) {
+      const body = document.getElementById('modal-body');
+      body.innerHTML = '<div class="loader" style="padding: 10px 0;"><div class="spinner"></div><p style="margin:0;">Generando...</p></div>';
+      
+      try {
+        const blob = await generateImageBlob(text);
         const file = new File([blob], 'cita_escuela_sabatica.png', { type: 'image/png' });
-        if (navigator.share) {
+        
+        // Intentar usar la API Nativa de Compartir
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               title: 'Cita de Escuela Sabática',
               files: [file]
             });
+            closeModal();
           } catch (err) {
-            console.error('Error al compartir:', err);
+            console.log('Usuario canceló o falló share nativo:', err);
+            showImageFallback(blob);
           }
         } else {
-          // Fallback para PC
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'cita_escuela_sabatica.png';
-          a.click();
+          showImageFallback(blob);
         }
+      } catch (err) {
+        body.innerHTML = '<p style="color:red">Error al generar la imagen.</p>';
+      }
+    }
+
+    function showImageFallback(blob) {
+      const body = document.getElementById('modal-body');
+      const url = URL.createObjectURL(blob);
+      body.innerHTML = `
+        <p style="font-size: 0.95rem; color: #17211c; margin-bottom: 8px;">
+          <b>Mantén presionada</b> la imagen para guardarla o compartirla en WhatsApp.
+        </p>
+        <img src="${url}" class="preview-img" alt="Cita Generada" />
+        <a href="${url}" download="cita_adventista.png" class="modal-btn" style="margin-top: 16px;">Descargar</a>
+      `;
+    }
+
+    async function generateImageBlob(text) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1920;
+        const ctx = canvas.getContext('2d');
+        
+        const pastelGradients = [
+          ['#ffecd2', '#fcb69f'], ['#cfd9df', '#e2ebf0'], ['#a1c4fd', '#c2e9fb'], 
+          ['#fbc2eb', '#a6c1ee'], ['#fdcbf1', '#e6dee9'], ['#a8edea', '#fed6e3'], 
+          ['#e0c3fc', '#8ec5fc'], ['#fdfbfb', '#ebedee'], ['#f5f7fa', '#c3cfe2']
+        ];
+        
+        const gradientColors = pastelGradients[Math.floor(Math.random() * pastelGradients.length)];
+        const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
+        gradient.addColorStop(0, gradientColors[0]);
+        gradient.addColorStop(1, gradientColors[1]);
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1080, 1920);
+        
+        ctx.fillStyle = 'rgba(178, 138, 80, 0.4)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 160px Georgia';
+        ctx.fillText('“', 540, 1920 / 2 - 250);
+        
+        ctx.fillStyle = '#17211c';
+        ctx.font = 'bold 64px Inter, sans-serif';
+        
+        const words = text.split(' ');
+        let line = '';
+        let posY = 1920 / 2 - 150;
+        const lineHeight = 95;
+        const maxWidth = 880;
+        
+        for(let n = 0; n < words.length; n++) {
+          let testLine = line + words[n] + ' ';
+          let metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && n > 0) {
+            ctx.fillText(line, 540, posY);
+            line = words[n] + ' ';
+            posY += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, 540, posY);
+        
+        ctx.fillStyle = 'rgba(23, 33, 28, 0.6)';
+        ctx.font = '500 36px Inter, sans-serif';
+        ctx.fillText('Escuela Sabática', 540, 1920 - 150);
+        
+        canvas.toBlob(blob => resolve(blob), 'image/png');
       });
     }
 
