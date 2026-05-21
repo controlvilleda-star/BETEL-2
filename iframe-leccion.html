@@ -483,7 +483,7 @@
           }
         } else if (e.target.classList.contains('highlight-pastel')) {
           const textToShare = e.target.innerText;
-          showModal(textToShare);
+          showModal(textToShare, e.target);
         }
       });
     }
@@ -528,50 +528,64 @@
       throw new Error("No proxy available");
     }
 
-    // Funciones del Modal
-    function showModal(textToShare) {
-      const modal = document.getElementById('action-modal');
-      const body = document.getElementById('modal-body');
+    // Funciones de Compartir (Totalmente Inline para evitar bugs de iframe)
+    function showModal(textToShare, element) {
+      // Eliminar otros boxes en línea si existen
+      document.querySelectorAll('.inline-share-box').forEach(el => el.remove());
+      
+      const box = document.createElement('div');
+      box.className = 'inline-share-box';
+      box.style.cssText = 'margin-top: 12px; margin-bottom: 16px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px;';
+      
       const safeText = textToShare.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      body.innerHTML = `<button class="modal-btn primary" onclick="handleShare('${safeText}', null)">📲 Generar Imagen para Estado</button>`;
-      modal.style.display = 'flex';
-      setTimeout(() => document.querySelector('.modal-content').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+      box.innerHTML = `<button class="modal-btn primary" onclick="handleShareInline(this.closest('.inline-share-box'), '${safeText}', null)" style="margin:0;">📲 Generar Imagen para Estado</button>`;
+      
+      // Encontrar el elemento padre más seguro para insertar (un párrafo o div)
+      const parentBlock = element.closest('p, div, blockquote');
+      if (parentBlock) {
+        parentBlock.parentNode.insertBefore(box, parentBlock.nextSibling);
+      } else {
+        element.parentNode.insertBefore(box, element.nextSibling);
+      }
     }
 
     function openShareSelection(btn, citation) {
       const box = btn.closest('.verse-box');
+      const actionsDiv = box.querySelector('.verse-actions');
       const verses = JSON.parse(box.dataset.verses);
       
       if (verses.length <= 1) {
-         handleShare(verses[0].replace(/\[\d+\]/g, '').trim(), citation);
+         handleShareInline(actionsDiv, verses[0].replace(/\[\d+\]/g, '').trim(), citation);
          return;
       }
       
-      const modal = document.getElementById('action-modal');
-      const body = document.getElementById('modal-body');
-      
-      let html = `<p style="margin-top:0; font-size:0.95rem; color:#666; margin-bottom:12px;">Elige los versículos que deseas compartir:</p>`;
-      html += `<div style="text-align:left; max-height:220px; overflow-y:auto; margin-bottom:16px; background:#f9f9f9; padding:12px; border-radius:8px; border:1px solid #eee;">`;
+      let html = `<div class="verse-selection-ui" style="background:#f9f9f9; padding:16px; border-radius:12px; border:1px solid #e2e8f0; margin-top:12px; width:100%; box-sizing:border-box;">`;
+      html += `<p style="margin-top:0; font-size:0.95rem; color:#475569; margin-bottom:12px; font-weight:500;">Elige los versículos a compartir:</p>`;
+      html += `<div style="text-align:left; max-height:250px; overflow-y:auto; margin-bottom:16px;" class="verse-checkboxes">`;
       verses.forEach((v, idx) => {
-        html += `<label style="display:flex; gap:8px; margin-bottom:10px; cursor:pointer; align-items:flex-start;">
-                   <input type="checkbox" class="verse-checkbox" value="${idx}" checked style="margin-top:4px; flex-shrink:0;"> 
-                   <span style="font-size:0.9rem; line-height:1.4;">${v}</span>
+        html += `<label style="display:flex; gap:10px; margin-bottom:12px; cursor:pointer; align-items:flex-start;">
+                   <input type="checkbox" value="${idx}" checked style="margin-top:4px; width:18px; height:18px; flex-shrink:0; accent-color:#0f766e;"> 
+                   <span style="font-size:0.95rem; line-height:1.4; color:#1e293b;">${v}</span>
                  </label>`;
       });
       html += `</div>`;
-      html += `<button class="modal-btn primary" onclick="confirmShareSelection('${citation}')">📲 Generar Imagen</button>`;
+      html += `<div style="display:flex; flex-direction:column; gap:8px;">
+                 <button class="modal-btn primary" onclick="confirmShareInline(this, '${citation}')" style="margin:0;">📲 Confirmar y Generar</button>
+               </div>`;
+      html += `</div>`;
       
-      body.innerHTML = html;
-      window.currentShareVerses = verses;
-      modal.style.display = 'flex';
-      setTimeout(() => document.querySelector('.modal-content').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+      actionsDiv.innerHTML = html;
     }
 
-    function confirmShareSelection(citation) {
-       const checkboxes = document.querySelectorAll('.verse-checkbox');
+    function confirmShareInline(btn, citation) {
+       const container = btn.closest('.verse-selection-ui');
+       const box = btn.closest('.verse-box');
+       const verses = JSON.parse(box.dataset.verses);
+       
+       const checkboxes = container.querySelectorAll('input[type="checkbox"]');
        let selected = [];
-       checkboxes.forEach(cb => {
-          if (cb.checked) selected.push(window.currentShareVerses[cb.value].replace(/\[\d+\]/g, '').trim());
+       checkboxes.forEach((cb, idx) => {
+          if (cb.checked) selected.push(verses[idx].replace(/\[\d+\]/g, '').trim());
        });
        
        if (selected.length === 0) {
@@ -580,23 +594,12 @@
        }
        
        const textToShare = selected.join(' ');
-       handleShare(textToShare, citation);
+       handleShareInline(box.querySelector('.verse-actions'), textToShare, citation);
     }
 
-    function closeModal() {
-      document.getElementById('action-modal').style.display = 'none';
-    }
-
-    async function handleShare(text, citation) {
-      const body = document.getElementById('modal-body');
-      body.innerHTML = '<div class="loader" style="padding: 10px 0;"><div class="spinner"></div><p style="margin:0;">Generando imagen...</p></div>';
+    async function handleShareInline(container, text, citation) {
+      container.innerHTML = '<div class="loader" style="padding: 16px 0; background:white; border-radius:12px; border:1px solid var(--line); margin-top:12px;"><div class="spinner"></div><p style="margin:0;">Generando imagen de alta calidad...</p></div>';
       
-      const modal = document.getElementById('action-modal');
-      if (modal.style.display === 'none') {
-         modal.style.display = 'flex';
-         setTimeout(() => document.querySelector('.modal-content').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-      }
-
       try {
         const blob = await generateImageBlob(text, citation);
         const file = new File([blob], 'cita_escuela_sabatica.png', { type: 'image/png' });
@@ -607,40 +610,40 @@
               title: 'Cita de Escuela Sabática',
               files: [file]
             });
-            closeModal();
+            container.innerHTML = `<p style="color:#0f766e; font-weight:bold; margin-top:16px;">¡Compartido exitosamente!</p>`;
           } catch (err) {
-            showImageFallback(blob, text, citation);
+            showImageFallbackInline(container, blob, text, citation);
           }
         } else {
-          showImageFallback(blob, text, citation);
+          showImageFallbackInline(container, blob, text, citation);
         }
       } catch (err) {
-        body.innerHTML = '<p style="color:red">Error al generar la imagen.</p>';
+        container.innerHTML = '<p style="color:red; margin-top:16px;">Error al generar la imagen.</p>';
       }
     }
 
-    function showImageFallback(blob, text, citation) {
-      const body = document.getElementById('modal-body');
+    function showImageFallbackInline(container, blob, text, citation) {
       const url = URL.createObjectURL(blob);
-      
       const citationText = citation ? ` - ${citation}` : '';
       const whatsappText = encodeURIComponent(`"${text}"${citationText}\n\n📖 *Escuela Sabática*`);
       
-      body.innerHTML = `
-        <p style="font-size: 0.95rem; color: #17211c; margin-bottom: 8px;">
-          <b>Mantén presionada</b> la imagen para guardarla y subirla a tu estado.
-        </p>
-        <img src="${url}" class="preview-img" alt="Cita Generada" />
-        
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px; margin-top:0;">O compártelo directamente como texto:</p>
-        
-        <a href="whatsapp://send?text=${whatsappText}" target="_blank" class="modal-btn whatsapp">
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg> 
-          Enviar como Texto
-        </a>
-        <a href="${url}" download="cita_adventista.png" class="modal-btn">💾 Descargar a PC</a>
+      container.innerHTML = `
+        <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--line); margin-top:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+          <p style="font-size: 0.95rem; color: #17211c; margin-top: 0; margin-bottom: 12px; line-height:1.4;">
+            <b>Mantén presionada</b> la imagen para guardarla y subirla a tu estado.
+          </p>
+          <img src="${url}" style="width:100%; max-height:300px; object-fit:contain; border-radius:8px; background:#fdfaf6; border:1px solid #e2e8f0; margin-bottom:16px;" alt="Cita Generada" />
+          
+          <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px; margin-top:0;">O compártelo directamente como texto:</p>
+          <a href="whatsapp://send?text=${whatsappText}" target="_blank" class="modal-btn whatsapp" style="display:flex; justify-content:center; align-items:center; gap:8px;">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg> 
+            Enviar como Texto
+          </a>
+          <a href="${url}" download="cita_adventista.png" class="modal-btn" style="margin-bottom:0;">💾 Descargar a PC</a>
+        </div>
       `;
     }
+
 
     async function generateImageBlob(text, citation) {
       return new Promise((resolve) => {
