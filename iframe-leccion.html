@@ -7,17 +7,93 @@
   <link rel="stylesheet" href="./styles.css" />
   <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="./app.js"></script>
+  
   <style>
     body {
       background: transparent;
       padding: 12px;
       margin: 0;
       min-height: auto;
+      top: 0px !important;
     }
+    
+    /* Ocultar elementos de Google Translate */
+    .skiptranslate { display: none !important; }
+    .VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; }
+    #goog-gt-tt { display: none !important; }
+    
     .widget-container {
       max-width: 600px;
       margin: 0 auto;
     }
+    
+    .lang-switcher {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      justify-content: flex-end;
+    }
+    .lang-btn {
+      background: var(--surface-warm);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .lang-btn:hover {
+      background: var(--line);
+    }
+    .lang-btn.active {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+    }
+
+    .memory-block {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+    .memory-block h3 {
+      color: var(--gold);
+      font-size: 0.85rem;
+      margin: 0 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .memory-block p {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.15rem;
+      color: #3b2a10;
+      margin: 0 0 8px 0;
+      font-style: italic;
+    }
+    .memory-block span {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .date-label {
+      display: inline-block;
+      background: var(--gold);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .bible-embed {
       margin-top: 16px;
       padding: 16px;
@@ -58,6 +134,7 @@
       gap: 8px;
       padding: 14px;
       background: var(--surface-warm);
+      margin-top: 16px;
     }
     .egw-mini strong {
       color: var(--gold);
@@ -78,8 +155,21 @@
 <body>
   <div class="widget-container" id="widget-root"></div>
 
+  <!-- Contenedor oculto de Google Translate -->
+  <div id="google_translate_element" style="display:none;"></div>
+
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'es',
+        includedLanguages: 'en,it,es,ca',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <script>
-    // Textos bíblicos pre-cargados en Reina Valera Antigua (RV1909)
     const bibleTexts = {
       "Hebreos 11:1": "Es pues la fe la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven.",
       "Romanos 1:17; 2 Corintios 5:7": "<strong>Romanos 1:17</strong><br>Porque en él la justicia de Dios se descubre de fe en fe; como está escrito: Mas el justo vivirá por la fe.<br><br><strong>2 Corintios 5:7</strong><br>(Porque por fe andamos, no por vista;)",
@@ -91,16 +181,47 @@
       "Hebreos 11": "<strong>Hebreos 11:1-2</strong><br>Es pues la fe la sustancia de las cosas que se esperan, la demostración de las cosas que no se ven. Porque por ella alcanzaron testimonio los antiguos."
     };
 
+    function changeLanguage(langCode, btn) {
+      // Remover clase active de todos los botones
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = langCode;
+        select.dispatchEvent(new Event('change'));
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const day = getTodaySchoolDay();
       const root = document.getElementById("widget-root");
       
       const bibleText = bibleTexts[day.reading] || "Texto bíblico completo disponible en tu Biblia.";
 
+      // Formatear la fecha
+      const dateParts = day.date.split('-');
+      const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
       root.innerHTML = `
+        <div class="lang-switcher" translate="no">
+          <button class="lang-btn active" onclick="changeLanguage('es', this)">🇪🇸 ES</button>
+          <button class="lang-btn" onclick="changeLanguage('en', this)">🇬🇧 EN</button>
+          <button class="lang-btn" onclick="changeLanguage('it', this)">🇮🇹 IT</button>
+          <button class="lang-btn" onclick="changeLanguage('ca', this)">🏴 CA</button>
+        </div>
+
+        <div class="memory-block">
+          <h3>Versículo para Memorizar</h3>
+          <p>"${escapeHtml(sabbathSchool.memoryText)}"</p>
+          <span>— ${escapeHtml(sabbathSchool.memoryRef)}</span>
+        </div>
+
         <div class="module">
           <div class="module-head">
             <div>
+              <span class="date-label">${escapeHtml(formattedDate)}</span>
               <p class="eyebrow">${escapeHtml(sabbathSchool.title)}</p>
               <h2 style="margin-bottom: 4px;">${escapeHtml(day.label)}: ${escapeHtml(day.title)}</h2>
             </div>
@@ -111,10 +232,10 @@
             <div class="bible-embed">
               <h4><i data-lucide="book-open" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"></i> Lectura: ${escapeHtml(day.reading)}</h4>
               <p>${bibleText}</p>
-              <span class="bible-meta">Reina Valera Antigua (RV1909)</span>
+              <span class="bible-meta" translate="no">Reina Valera Antigua (RV1909)</span>
             </div>
             
-            <div class="egw-mini" style="margin-top: 16px;">
+            <div class="egw-mini">
               <div class="row-top">
                 <strong>${escapeHtml(sabbathSchool.egwFocus.reference)}</strong>
                 ${
