@@ -300,17 +300,16 @@
         
         <style>
           .highlight-pastel {
-            background: linear-gradient(120deg, rgba(253, 224, 71, 0.5) 0%, rgba(253, 224, 71, 0.5) 100%);
+            background-image: linear-gradient(120deg, var(--highlight-color, rgba(253, 224, 71, 0.5)) 0%, var(--highlight-color, rgba(253, 224, 71, 0.5)) 100%);
             background-repeat: no-repeat;
             background-size: 100% 45%;
             background-position: 0 90%;
             cursor: pointer;
-            transition: background-color 0.2s, background-size 0.2s;
+            transition: background-size 0.2s ease-in-out;
             border-radius: 2px;
             padding: 0 2px;
           }
           .highlight-pastel:hover {
-            background-color: rgba(253, 224, 71, 0.6);
             background-size: 100% 100%;
           }
           .verse {
@@ -322,9 +321,27 @@
         </style>
       `;
 
-      // Resaltador de palabras clave (marcador pastel)
+      // Resaltador de palabras clave por categorías de colores
       const contentBox = document.getElementById('sabbath-content-box');
-      const keywords = ['fe', 'jesús', 'cristo', 'sábado', 'santuario', 'gracia', 'salvación', 'amor', 'esperanza', 'justicia', 'pacto', 'ley', 'dios', 'espíritu'];
+      
+      const categoryColors = [
+        { 
+          color: "rgba(253, 224, 71, 0.6)", // Amarillo (Gracia, Santuario)
+          keys: ["gracia", "salvación", "santuario", "justicia"] 
+        },
+        { 
+          color: "rgba(167, 243, 208, 0.7)", // Verde menta (Deidad)
+          keys: ["jesús", "cristo", "dios", "espíritu", "señor"] 
+        },
+        { 
+          color: "rgba(191, 219, 254, 0.7)", // Azul claro (Ley, Pacto)
+          keys: ["sábado", "pacto", "ley", "mandamiento", "profecía"] 
+        },
+        { 
+          color: "rgba(254, 205, 211, 0.7)", // Rosa suave (Virtudes)
+          keys: ["fe", "esperanza", "amor", "paz", "perdón"] 
+        }
+      ];
       
       const walker = document.createTreeWalker(contentBox, NodeFilter.SHOW_TEXT, null, false);
       const nodes = [];
@@ -336,11 +353,22 @@
         const text = n.nodeValue;
         const sentenceRegex = /([A-Z¿¡][^.?!]+[.?!])/g;
         let modified = false;
+        
         let newHtml = text.replace(sentenceRegex, (sentence) => {
           const lower = sentence.toLowerCase();
-          if (keywords.some(kw => lower.includes(kw))) {
+          
+          // Encontrar qué categoría hace match primero
+          let matchedColor = null;
+          for (const cat of categoryColors) {
+            if (cat.keys.some(kw => lower.includes(kw))) {
+              matchedColor = cat.color;
+              break;
+            }
+          }
+          
+          if (matchedColor) {
             modified = true;
-            return `<span class="highlight-pastel" title="Haz clic para compartir en WhatsApp">${sentence}</span>`;
+            return `<span class="highlight-pastel" style="--highlight-color: ${matchedColor}" title="Haz clic para compartir en WhatsApp">${sentence}</span>`;
           }
           return sentence;
         });
@@ -352,10 +380,11 @@
         }
       });
       
-      // Agregar indicación RV1909 a los versículos
+      // Agregar indicación RV1909 a los versículos y darles un color por defecto (amarillo intenso)
       document.querySelectorAll('.verse').forEach(v => {
         v.innerHTML += ' (RV1909)';
-        v.classList.add('highlight-pastel'); // Hacerlos compartibles también
+        v.classList.add('highlight-pastel');
+        v.style.setProperty('--highlight-color', 'rgba(253, 224, 71, 0.6)');
         v.title = "Haz clic para compartir el versículo en WhatsApp";
       });
 
@@ -363,10 +392,10 @@
       contentBox.addEventListener('click', async (e) => {
         if (e.target.classList.contains('highlight-pastel') || e.target.classList.contains('verse')) {
           const textToShare = e.target.innerText.replace(' (RV1909)', '');
-          const originalBg = e.target.style.background;
-          e.target.style.background = 'rgba(0,0,0,0.1)'; // visual feedback
+          const originalSize = e.target.style.backgroundSize;
+          e.target.style.backgroundSize = '100% 100%'; // feedback visual
           await shareTextAsImage(textToShare);
-          e.target.style.background = originalBg;
+          setTimeout(() => { e.target.style.backgroundSize = originalSize; }, 500);
         }
       });
     }
@@ -377,52 +406,44 @@
       canvas.height = 1920;
       const ctx = canvas.getContext('2d');
       
-      // Fondo aleatorio orientado a las 28 creencias (naturaleza, iglesia, luz, etc.)
-      const bgNum = Math.floor(Math.random() * 30) + 1;
-      const imgUrl = `https://loremflickr.com/1080/1920/nature,peace,light/all?random=${bgNum}`;
+      // Paletas de degradados pastel
+      const pastelGradients = [
+        ['#ffecd2', '#fcb69f'], // Durazno
+        ['#cfd9df', '#e2ebf0'], // Plata/Azul grisáceo
+        ['#a1c4fd', '#c2e9fb'], // Cielo
+        ['#fbc2eb', '#a6c1ee'], // Rosa a lila
+        ['#fdcbf1', '#e6dee9'], // Rosado muy suave
+        ['#a8edea', '#fed6e3'], // Verde menta a rosa
+        ['#e0c3fc', '#8ec5fc'], // Púrpura a azul
+        ['#fdfbfb', '#ebedee'], // Blanco hueso
+        ['#f5f7fa', '#c3cfe2']  // Gris pardo suave
+      ];
       
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
+      const gradientColors = pastelGradients[Math.floor(Math.random() * pastelGradients.length)];
+      const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
+      gradient.addColorStop(0, gradientColors[0]);
+      gradient.addColorStop(1, gradientColors[1]);
       
-      try {
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = imgUrl;
-        });
-      } catch(err) {
-        // Fallback color gradient if image fails
-        ctx.fillStyle = '#1e3a8a';
-        ctx.fillRect(0,0,1080,1920);
-      }
-      
-      if(img.complete) {
-        ctx.drawImage(img, 0, 0, 1080, 1920);
-      }
-      
-      // Overlay oscuro para máximo contraste del texto
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+      // Fondo degradado
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1080, 1920);
       
-      // Dibujar texto
-      ctx.fillStyle = '#ffffff';
+      // Comillas doradas (suaves)
+      ctx.fillStyle = 'rgba(178, 138, 80, 0.4)'; // Color --gold con opacidad
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.font = 'bold 160px Georgia';
+      ctx.fillText('“', 540, 1920 / 2 - 250);
+      
+      // Dibujar texto principal en tono oscuro para legibilidad (var--ink = #17211c)
+      ctx.fillStyle = '#17211c';
       ctx.font = 'bold 64px Inter, sans-serif';
       
       const words = text.split(' ');
       let line = '';
-      let posY = 1920 / 2 - 200;
-      const lineHeight = 90;
-      const maxWidth = 900;
-      
-      // Comillas
-      ctx.fillStyle = '#fde047'; // Amarillo pastel
-      ctx.font = 'bold 120px Georgia';
-      ctx.fillText('“', 540, posY - 100);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 64px Inter, sans-serif';
+      let posY = 1920 / 2 - 150;
+      const lineHeight = 95;
+      const maxWidth = 880;
       
       for(let n = 0; n < words.length; n++) {
         let testLine = line + words[n] + ' ';
@@ -437,14 +458,14 @@
       }
       ctx.fillText(line, 540, posY);
       
-      // Footer
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.font = '36px Inter, sans-serif';
-      ctx.fillText('Escuela Sabática · Creencias Adventistas', 540, 1920 - 150);
+      // Footer (Firma)
+      ctx.fillStyle = 'rgba(23, 33, 28, 0.6)';
+      ctx.font = '500 36px Inter, sans-serif';
+      ctx.fillText('Escuela Sabática', 540, 1920 - 150);
       
       // Crear blob y compartir
       canvas.toBlob(async (blob) => {
-        const file = new File([blob], 'cita_adventista.png', { type: 'image/png' });
+        const file = new File([blob], 'cita_escuela_sabatica.png', { type: 'image/png' });
         if (navigator.share) {
           try {
             await navigator.share({
@@ -458,7 +479,7 @@
           // Fallback para PC
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
-          a.download = 'cita_adventista.png';
+          a.download = 'cita_escuela_sabatica.png';
           a.click();
         }
       });
