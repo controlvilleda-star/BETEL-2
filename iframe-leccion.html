@@ -92,46 +92,45 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Usamos la lógica de tu app.js para saber qué día es
       const day = getTodaySchoolDay();
       const root = document.getElementById("widget-root");
       
       const bibleText = bibleTexts[day.reading] || "Texto bíblico completo disponible en tu Biblia.";
 
-      root.innerHTML = \`
+      root.innerHTML = `
         <div class="module">
           <div class="module-head">
             <div>
-              <p class="eyebrow">\${escapeHtml(sabbathSchool.title)}</p>
-              <h2 style="margin-bottom: 4px;">\${escapeHtml(day.label)}: \${escapeHtml(day.title)}</h2>
+              <p class="eyebrow">${escapeHtml(sabbathSchool.title)}</p>
+              <h2 style="margin-bottom: 4px;">${escapeHtml(day.label)}: ${escapeHtml(day.title)}</h2>
             </div>
           </div>
           <div class="module-body" style="padding-top: 10px;">
-            <p style="margin: 0 0 16px; color: var(--ink); line-height: 1.5; font-size: 1.02rem;">\${escapeHtml(day.summary)}</p>
+            <p style="margin: 0 0 16px; color: var(--ink); line-height: 1.5; font-size: 1.02rem;">${escapeHtml(day.summary)}</p>
             
             <div class="bible-embed">
-              <h4><i data-lucide="book-open" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"></i> Lectura: \${escapeHtml(day.reading)}</h4>
-              <p>\${bibleText}</p>
+              <h4><i data-lucide="book-open" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"></i> Lectura: ${escapeHtml(day.reading)}</h4>
+              <p>${bibleText}</p>
               <span class="bible-meta">Reina Valera Antigua (RV1909)</span>
             </div>
             
             <div class="egw-mini" style="margin-top: 16px;">
               <div class="row-top">
-                <strong>\${escapeHtml(sabbathSchool.egwFocus.reference)}</strong>
-                \${
+                <strong>${escapeHtml(sabbathSchool.egwFocus.reference)}</strong>
+                ${
                   sabbathSchool.egwFocus.link
-                    ? \`<a href="\${escapeHtml(sabbathSchool.egwFocus.link)}" target="_blank" rel="noopener noreferrer" class="icon-button ghost" style="min-height:24px;width:24px;height:24px;padding:0;" title="Leer párrafo completo">
+                    ? `<a href="${escapeHtml(sabbathSchool.egwFocus.link)}" target="_blank" rel="noopener noreferrer" class="icon-button ghost" style="min-height:24px;width:24px;height:24px;padding:0;" title="Leer párrafo completo">
                          <i data-lucide="external-link" style="width:14px;height:14px"></i>
-                       </a>\`
-                    : \`\`
+                       </a>`
+                    : ``
                 }
               </div>
-              <p>"\${escapeHtml(sabbathSchool.egwFocus.quote)}"</p>
-              <span>\${escapeHtml(sabbathSchool.egwFocus.note)}</span>
+              <p>"${escapeHtml(sabbathSchool.egwFocus.quote)}"</p>
+              <span>${escapeHtml(sabbathSchool.egwFocus.note)}</span>
             </div>
           </div>
         </div>
-      \`;
+      `;
 
       if (window.lucide) {
         window.lucide.createIcons();
