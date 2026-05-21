@@ -392,28 +392,97 @@
         v.title = "Haz clic para interactuar";
       });
 
-      contentBox.addEventListener('click', (e) => {
-        if (e.target.classList.contains('highlight-pastel') || e.target.classList.contains('verse')) {
-          const isVerse = e.target.classList.contains('verse');
-          const rawText = e.target.innerText;
-          const textToShare = rawText.replace(' (RV1909)', '');
-          showModal(textToShare, isVerse, rawText);
+      contentBox.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('verse')) {
+          e.preventDefault();
+          const verseLink = e.target;
+          
+          if (verseLink.nextElementSibling && verseLink.nextElementSibling.classList.contains('verse-box')) {
+            verseLink.nextElementSibling.remove();
+            return;
+          }
+          
+          const rawText = verseLink.innerText;
+          const query = rawText.replace(' (RV1909)', '').replace(/ al /gi, '-').replace(/ y /gi, ',');
+          
+          const box = document.createElement('div');
+          box.className = 'verse-box';
+          box.innerHTML = `<div class="loader" style="padding: 10px;"><div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div></div>`;
+          
+          verseLink.parentNode.insertBefore(box, verseLink.nextSibling);
+          
+          try {
+            const bgwUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=RVA`;
+            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(bgwUrl)}`;
+            const res = await fetch(proxy);
+            const data = await res.json();
+            
+            const temp = document.createElement('div');
+            temp.innerHTML = data.contents;
+            const passage = temp.querySelector('.passage-text');
+            
+            if (passage) {
+              passage.querySelectorAll('sup, .crossreference, .footnote, h1, h2, h3').forEach(el => el.remove());
+              const text = passage.innerText.replace(/\s+/g, ' ').trim();
+              
+              box.innerHTML = `
+                <p class="verse-text">«${text}»</p>
+                <div class="verse-actions">
+                  <button class="verse-btn" onclick="speakText(this, '${text.replace(/'/g, "\\'").replace(/"/g, '')}')">🔊 Escuchar (RV1909)</button>
+                  <button class="verse-btn primary" onclick="handleShare('${text.replace(/'/g, "\\'").replace(/"/g, '')}')">📲 Compartir Imagen</button>
+                </div>
+              `;
+            } else {
+              box.innerHTML = `<p style="color:#b33914; margin:0; font-size:0.9rem;">No se pudo cargar el versículo. Intenta de nuevo.</p>`;
+            }
+          } catch(err) {
+            box.innerHTML = `<p style="color:#b33914; margin:0; font-size:0.9rem;">Error de conexión.</p>`;
+          }
+        } else if (e.target.classList.contains('highlight-pastel')) {
+          const textToShare = e.target.innerText;
+          showModal(textToShare);
         }
       });
     }
 
-    // Funciones del Modal
-    function showModal(textToShare, isVerse, rawText) {
+    // Funciones Text-To-Speech
+    window.currentUtterance = null;
+    function speakText(btn, text) {
+      const synth = window.speechSynthesis;
+      if (synth.speaking) {
+        synth.cancel();
+        document.querySelectorAll('.verse-btn.playing').forEach(b => {
+          b.classList.remove('playing');
+          b.innerHTML = '🔊 Escuchar (RV1909)';
+        });
+        if (window.currentUtterance && window.currentUtterance.text === text) {
+          window.currentUtterance = null;
+          return; // Stop playback
+        }
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.95; // Ligero ajuste para sonar más pausado y reflexivo
+      
+      utterance.onend = () => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '🔊 Escuchar (RV1909)';
+        window.currentUtterance = null;
+      };
+      
+      window.currentUtterance = utterance;
+      btn.classList.add('playing');
+      btn.innerHTML = '⏸️ Detener Lectura';
+      synth.speak(utterance);
+    }
+
+    // Funciones del Modal para texto normal
+    function showModal(textToShare) {
       const modal = document.getElementById('action-modal');
       const body = document.getElementById('modal-body');
       
       let html = '';
-      if (isVerse) {
-        // Formatear texto para búsqueda: "Mateo 26: 36 al 42" -> "Mateo 26:36-42"
-        let query = rawText.replace(' (RV1909)', '').replace(/ al /gi, '-').replace(/ y /gi, ',');
-        html += `<a href="https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=RVA" target="_blank" class="modal-btn" onclick="closeModal()">📖 Leer Versículo (RV1909)</a>`;
-      }
-      
       const safeText = textToShare.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       html += `<button class="modal-btn primary" onclick="handleShare('${safeText}')">📲 Generar Imagen para Estado</button>`;
       
