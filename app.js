@@ -1340,6 +1340,7 @@ const refs = {};
 
 document.addEventListener("DOMContentLoaded", () => {
   refs.screen = document.querySelector("#screen");
+  if (!refs.screen) return;
   refs.search = document.querySelector("#globalSearch");
   refs.language = document.querySelector("#languageFilter");
   refs.testament = document.querySelector("#testamentFilter");
