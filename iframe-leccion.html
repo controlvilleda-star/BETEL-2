@@ -413,36 +413,60 @@
           
           try {
             const bgwUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=RVA`;
-            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(bgwUrl)}`;
-            const res = await fetch(proxy);
-            const data = await res.json();
+            const htmlStr = await fetchWithFallback(bgwUrl);
             
             const temp = document.createElement('div');
-            temp.innerHTML = data.contents;
+            temp.innerHTML = htmlStr;
             const passage = temp.querySelector('.passage-content') || temp.querySelector('.passage-text');
             
             if (passage) {
-              passage.querySelectorAll('sup, .crossreference, .footnote, h1, h2, h3').forEach(el => el.remove());
-              let text = passage.innerText.replace(/\s+/g, ' ').trim();
-              text = text.replace(/Read full chapter/gi, '').trim();
+              passage.querySelectorAll('.crossreference, .footnote, h1, h2, h3').forEach(el => el.remove());
               
-              const safeText = text.replace(/'/g, "\\'").replace(/"/g, '');
+              // Marcar los versículos
+              passage.querySelectorAll('sup.versenum').forEach(num => {
+                 num.outerHTML = `|||${num.innerText.trim()}|||`;
+              });
+              passage.querySelectorAll('sup').forEach(el => el.remove());
+              
+              let rawPassage = passage.innerText.replace(/\s+/g, ' ').replace(/Read full chapter/gi, '').trim();
+              
+              let versesData = [];
+              const chunks = rawPassage.split('|||').map(s => s.trim()).filter(Boolean);
+              
+              let currentV = "";
+              chunks.forEach(chunk => {
+                if (!isNaN(parseInt(chunk)) && chunk.length <= 3) {
+                  if (currentV) versesData.push(currentV.trim());
+                  currentV = `[${chunk}] `;
+                } else {
+                  currentV += chunk + " ";
+                }
+              });
+              if (currentV) versesData.push(currentV.trim());
+              if (versesData.length === 0) versesData = [rawPassage];
+              
+              const textToSpeak = versesData.join(' ').replace(/\[\d+\]/g, '').replace(/'/g, "\\'").replace(/"/g, '');
+              const citation = rawText.replace(' 🔊', '');
               
               box.innerHTML = `
-                <p class="verse-text" onclick="speakText(this, '${safeText}')" title="Toca para escuchar" style="cursor:pointer;">
+                <p class="verse-text" onclick="speakText(this, '${textToSpeak}')" title="Toca para escuchar" style="cursor:pointer;">
                   <span class="highlight-pastel" style="--highlight-color: rgba(253, 186, 116, 0.5); background-size: 100% 100%;">
-                    «${text}»
+                    «${versesData.join(' ')}»
                   </span>
                 </p>
                 <div class="verse-actions">
-                  <button class="verse-btn primary" onclick="handleShare('${safeText}')">📲 Compartir Imagen</button>
+                  <button class="verse-btn primary" onclick="openShareSelection(this, '${citation}')">📲 Compartir Imagen</button>
                 </div>
               `;
+              
+              // Guardar contexto para compartir
+              box.dataset.verses = JSON.stringify(versesData);
             } else {
               box.innerHTML = `<p style="color:#b33914; margin:0; font-size:0.9rem;">No se pudo cargar el versículo. Intenta de nuevo.</p>`;
             }
           } catch(err) {
-            box.innerHTML = `<p style="color:#b33914; margin:0; font-size:0.9rem;">Error de conexión.</p>`;
+            box.innerHTML = `<p style="color:#b33914; margin:0; font-size:0.9rem;">Error de conexión. Intenta nuevamente.</p>`;
+            console.error(err);
           }
         } else if (e.target.classList.contains('highlight-pastel')) {
           const textToShare = e.target.innerText;
@@ -457,54 +481,110 @@
       const synth = window.speechSynthesis;
       if (synth.speaking) {
         synth.cancel();
-        // Remove animation if we add one
         if (window.currentUtterance && window.currentUtterance.text === text) {
           window.currentUtterance = null;
           element.style.opacity = '1';
-          return; // Stop playback
+          return;
         }
       }
-      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'es-ES';
       utterance.rate = 0.95; 
-      
       utterance.onend = () => {
         window.currentUtterance = null;
         element.style.opacity = '1';
       };
-      
       window.currentUtterance = utterance;
-      element.style.opacity = '0.7'; // Indicador visual de que está leyendo
+      element.style.opacity = '0.7'; 
       synth.speak(utterance);
     }
 
-    // Funciones del Modal para texto normal
+    // Proxy robusto para evitar fallos de conexión
+    async function fetchWithFallback(url) {
+      try {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.contents) return data.contents;
+      } catch(e) {}
+      
+      try {
+        const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+        return await res2.text();
+      } catch(e) {}
+      
+      throw new Error("No proxy available");
+    }
+
+    // Funciones del Modal
     function showModal(textToShare) {
       const modal = document.getElementById('action-modal');
       const body = document.getElementById('modal-body');
-      
-      let html = '';
       const safeText = textToShare.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      html += `<button class="modal-btn primary" onclick="handleShare('${safeText}')">📲 Generar Imagen para Estado</button>`;
+      body.innerHTML = `<button class="modal-btn primary" onclick="handleShare('${safeText}', null)">📲 Generar Imagen para Estado</button>`;
+      modal.style.display = 'flex';
+    }
+
+    function openShareSelection(btn, citation) {
+      const box = btn.closest('.verse-box');
+      const verses = JSON.parse(box.dataset.verses);
+      
+      if (verses.length <= 1) {
+         handleShare(verses[0].replace(/\[\d+\]/g, '').trim(), citation);
+         return;
+      }
+      
+      const modal = document.getElementById('action-modal');
+      const body = document.getElementById('modal-body');
+      
+      let html = `<p style="margin-top:0; font-size:0.95rem; color:#666; margin-bottom:12px;">Elige los versículos que deseas compartir:</p>`;
+      html += `<div style="text-align:left; max-height:220px; overflow-y:auto; margin-bottom:16px; background:#f9f9f9; padding:12px; border-radius:8px; border:1px solid #eee;">`;
+      verses.forEach((v, idx) => {
+        html += `<label style="display:flex; gap:8px; margin-bottom:10px; cursor:pointer; align-items:flex-start;">
+                   <input type="checkbox" class="verse-checkbox" value="${idx}" checked style="margin-top:4px;"> 
+                   <span style="font-size:0.9rem; line-height:1.4;">${v}</span>
+                 </label>`;
+      });
+      html += `</div>`;
+      html += `<button class="modal-btn primary" onclick="confirmShareSelection('${citation}')">📲 Generar Imagen</button>`;
       
       body.innerHTML = html;
+      window.currentShareVerses = verses;
       modal.style.display = 'flex';
+    }
+
+    function confirmShareSelection(citation) {
+       const checkboxes = document.querySelectorAll('.verse-checkbox');
+       let selected = [];
+       checkboxes.forEach(cb => {
+          if (cb.checked) selected.push(window.currentShareVerses[cb.value].replace(/\[\d+\]/g, '').trim());
+       });
+       
+       if (selected.length === 0) {
+          alert("Debes seleccionar al menos un versículo.");
+          return;
+       }
+       
+       const textToShare = selected.join(' ');
+       handleShare(textToShare, citation);
     }
 
     function closeModal() {
       document.getElementById('action-modal').style.display = 'none';
     }
 
-    async function handleShare(text) {
+    async function handleShare(text, citation) {
       const body = document.getElementById('modal-body');
-      body.innerHTML = '<div class="loader" style="padding: 10px 0;"><div class="spinner"></div><p style="margin:0;">Generando...</p></div>';
+      body.innerHTML = '<div class="loader" style="padding: 10px 0;"><div class="spinner"></div><p style="margin:0;">Generando imagen...</p></div>';
       
+      const modal = document.getElementById('action-modal');
+      if (modal.style.display === 'none') {
+         modal.style.display = 'flex';
+      }
+
       try {
-        const blob = await generateImageBlob(text);
+        const blob = await generateImageBlob(text, citation);
         const file = new File([blob], 'cita_escuela_sabatica.png', { type: 'image/png' });
         
-        // Intentar usar la API Nativa de Compartir
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
@@ -513,7 +593,6 @@
             });
             closeModal();
           } catch (err) {
-            console.log('Usuario canceló o falló share nativo:', err);
             showImageFallback(blob);
           }
         } else {
@@ -532,11 +611,11 @@
           <b>Mantén presionada</b> la imagen para guardarla o compartirla en WhatsApp.
         </p>
         <img src="${url}" class="preview-img" alt="Cita Generada" />
-        <a href="${url}" download="cita_adventista.png" class="modal-btn" style="margin-top: 16px;">Descargar</a>
+        <a href="${url}" download="cita_adventista.png" class="modal-btn" style="margin-top: 16px;">Descargar a PC</a>
       `;
     }
 
-    async function generateImageBlob(text) {
+    async function generateImageBlob(text, citation) {
       return new Promise((resolve) => {
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
@@ -557,33 +636,58 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 1080, 1920);
         
-        ctx.fillStyle = 'rgba(178, 138, 80, 0.4)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 160px Georgia';
-        ctx.fillText('“', 540, 1920 / 2 - 250);
+        // Calcular tamaño de fuente dinámico basado en la longitud
+        let fontSize = 64;
+        if (text.length > 150) fontSize = 52;
+        if (text.length > 250) fontSize = 42;
+        if (text.length > 400) fontSize = 34;
+        if (text.length > 600) fontSize = 28;
         
         ctx.fillStyle = '#17211c';
-        ctx.font = 'bold 64px Inter, sans-serif';
+        ctx.font = `bold ${fontSize}px Inter, sans-serif`;
         
         const words = text.split(' ');
-        let line = '';
-        let posY = 1920 / 2 - 150;
-        const lineHeight = 95;
+        const lines = [];
+        let currentLine = '';
         const maxWidth = 880;
         
         for(let n = 0; n < words.length; n++) {
-          let testLine = line + words[n] + ' ';
+          let testLine = currentLine + words[n] + ' ';
           let metrics = ctx.measureText(testLine);
           if (metrics.width > maxWidth && n > 0) {
-            ctx.fillText(line, 540, posY);
-            line = words[n] + ' ';
-            posY += lineHeight;
+            lines.push(currentLine.trim());
+            currentLine = words[n] + ' ';
           } else {
-            line = testLine;
+            currentLine = testLine;
           }
         }
-        ctx.fillText(line, 540, posY);
+        lines.push(currentLine.trim());
+        
+        const lineHeight = fontSize * 1.5;
+        const totalTextHeight = lines.length * lineHeight;
+        const citationHeight = citation ? fontSize * 1.2 + 40 : 0;
+        
+        // Centrado vertical
+        let startY = (1920 - (totalTextHeight + citationHeight)) / 2;
+        if (startY < 300) startY = 300; // Margen superior mínimo
+        
+        ctx.fillStyle = 'rgba(178, 138, 80, 0.4)';
+        ctx.font = 'bold 160px Georgia';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('“', 540, startY - 100);
+
+        ctx.fillStyle = '#17211c';
+        ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+        for (let i = 0; i < lines.length; i++) {
+          ctx.fillText(lines[i], 540, startY + (i * lineHeight));
+        }
+        
+        if (citation) {
+          ctx.fillStyle = '#b33914';
+          ctx.font = `bold ${Math.max(fontSize * 0.8, 30)}px Inter, sans-serif`;
+          ctx.fillText(citation, 540, startY + totalTextHeight + 60);
+        }
         
         ctx.fillStyle = 'rgba(23, 33, 28, 0.6)';
         ctx.font = '500 36px Inter, sans-serif';
