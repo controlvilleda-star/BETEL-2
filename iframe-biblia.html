@@ -1,0 +1,564 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lección Diaria</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  
+  <style>
+    body {
+      background: transparent;
+      padding: 16px;
+      margin: 0;
+      min-height: auto;
+      top: 0px !important;
+      font-family: Inter, Segoe UI, sans-serif;
+    }
+    
+    /* Ocultar elementos de Google Translate */
+    .skiptranslate { display: none !important; }
+    .VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; }
+    #goog-gt-tt { display: none !important; }
+    
+    .widget-container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      padding: 32px;
+      border: 1px solid var(--line);
+      position: relative;
+    }
+    
+    .lang-switcher {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+      justify-content: flex-end;
+    }
+    .lang-btn {
+      background: var(--surface-warm);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { background: var(--line); }
+    .lang-btn.active {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+    }
+
+    .date-header {
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    .lesson-title {
+      color: #9c4122;
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 0 0 24px 0;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+
+    .inter-image {
+      margin: 28px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .inter-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+      max-height: 350px;
+    }
+
+    .sabbath-content {
+      font-size: 1.1rem;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    
+    .sabbath-content p {
+      margin-bottom: 20px;
+    }
+    
+    .sabbath-content h3 {
+      font-size: 1.25rem;
+      color: #9c4122;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .sabbath-content blockquote {
+      margin: 32px 0;
+      padding: 20px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border-left: 4px solid #0f766e;
+    }
+    
+    .sabbath-content blockquote p {
+      font-size: 1.05rem;
+      color: #0f766e;
+      margin-bottom: 12px;
+      font-family: Inter, sans-serif;
+    }
+    
+    .sabbath-content blockquote p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+      color: var(--muted);
+    }
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.1);
+      border-left-color: var(--gold);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+      z-index: 99999; padding: 16px; box-sizing: border-box; backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: white; padding: 24px; border-radius: 16px; width: 100%; max-width: 380px;
+      position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center;
+      max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .modal-close {
+      position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 28px; cursor: pointer; color: var(--muted);
+    }
+    .modal-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px; margin-bottom: 12px;
+      background: var(--surface-warm); border: 1px solid var(--line); border-radius: 8px;
+      font-weight: 600; font-size: 0.95rem; color: var(--ink); cursor: pointer;
+      text-align: center; text-decoration: none; box-sizing: border-box; transition: 0.2s;
+    }
+    .modal-btn:hover { background: var(--line); }
+    .modal-btn.primary {
+      background: #0f766e; color: white; border-color: #0f766e;
+    }
+    .modal-btn.primary:hover { background: #0d615b; }
+    .modal-btn.whatsapp {
+      background: #25D366; color: white; border-color: #25D366;
+    }
+    .modal-btn.whatsapp:hover { background: #1ebd5c; }
+    
+    .preview-img {
+      width: 100%; max-height: 220px; object-fit: contain; border-radius: 8px; 
+      margin-top: 12px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line);
+      background: #fdfaf6;
+    }
+    .modal-title { margin-top: 0; margin-bottom: 16px; font-size: 1.25rem; color: #9c4122; }
+
+    #modal-body {
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Contenedor oculto de Google Translate -->
+  <div id="google_translate_element" style="display:none;"></div>
+
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'es',
+        includedLanguages: 'en,it,es,ca',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <div class="widget-container" id="widget-root">
+    <div style="display:flex; gap:10px; margin-bottom: 24px;">
+      <select id="book-select" style="flex:2; padding:12px; border-radius:8px; border:1px solid var(--line); font-size:1rem; font-family:Inter, sans-serif; background:var(--surface-warm);"></select>
+      <select id="chapter-select" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--line); font-size:1rem; font-family:Inter, sans-serif; background:var(--surface-warm);"></select>
+      <button onclick="loadChapter()" class="modal-btn primary" style="margin:0; width:auto; padding:10px 20px;">Ir</button>
+    </div>
+    
+    <div id="bible-content" class="sabbath-content">
+      <div style="text-align:center; padding:40px; color:#666;">Selecciona un libro y capítulo para comenzar a leer.</div>
+    </div>
+  </div>
+
+  <script    const books = [
+      { n: "Génesis", c: 50 }, { n: "Éxodo", c: 40 }, { n: "Levítico", c: 27 }, { n: "Números", c: 36 },
+      { n: "Deuteronomio", c: 34 }, { n: "Josué", c: 24 }, { n: "Jueces", c: 21 }, { n: "Rut", c: 4 },
+      { n: "1 Samuel", c: 31 }, { n: "2 Samuel", c: 24 }, { n: "1 Reyes", c: 22 }, { n: "2 Reyes", c: 25 },
+      { n: "1 Crónicas", c: 29 }, { n: "2 Crónicas", c: 36 }, { n: "Esdras", c: 10 }, { n: "Nehemías", c: 13 },
+      { n: "Ester", c: 10 }, { n: "Job", c: 42 }, { n: "Salmos", c: 150 }, { n: "Proverbios", c: 31 },
+      { n: "Eclesiastés", c: 12 }, { n: "Cantares", c: 8 }, { n: "Isaías", c: 66 }, { n: "Jeremías", c: 52 },
+      { n: "Lamentaciones", c: 5 }, { n: "Ezequiel", c: 48 }, { n: "Daniel", c: 12 }, { n: "Oseas", c: 14 },
+      { n: "Joel", c: 3 }, { n: "Amós", c: 9 }, { n: "Abdías", c: 1 }, { n: "Jonás", c: 4 },
+      { n: "Miqueas", c: 7 }, { n: "Nahúm", c: 3 }, { n: "Habacuc", c: 3 }, { n: "Sofonías", c: 3 },
+      { n: "Hageo", c: 2 }, { n: "Zacarías", c: 14 }, { n: "Malaquías", c: 4 }, { n: "Mateo", c: 28 },
+      { n: "Marcos", c: 16 }, { n: "Lucas", c: 24 }, { n: "Juan", c: 21 }, { n: "Hechos", c: 28 },
+      { n: "Romanos", c: 16 }, { n: "1 Corintios", c: 16 }, { n: "2 Corintios", c: 13 }, { n: "Gálatas", c: 6 },
+      { n: "Efesios", c: 6 }, { n: "Filipenses", c: 4 }, { n: "Colosenses", c: 4 }, { n: "1 Tesalonicenses", c: 5 },
+      { n: "2 Tesalonicenses", c: 3 }, { n: "1 Timoteo", c: 6 }, { n: "2 Timoteo", c: 4 }, { n: "Tito", c: 3 },
+      { n: "Filemón", c: 1 }, { n: "Hebreos", c: 13 }, { n: "Santiago", c: 5 }, { n: "1 Pedro", c: 5 },
+      { n: "2 Pedro", c: 3 }, { n: "1 Juan", c: 5 }, { n: "2 Juan", c: 1 }, { n: "3 Juan", c: 1 },
+      { n: "Judas", c: 1 }, { n: "Apocalipsis", c: 22 }
+    ];
+
+    let currentChapterVerses = [];
+
+    function changeLanguage(langCode, btn) {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+
+      const select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = langCode;
+        select.dispatchEvent(new Event('change'));
+      }
+    }
+
+    function initBible() {
+      const bookSelect = document.getElementById('book-select');
+      const chapterSelect = document.getElementById('chapter-select');
+      
+      books.forEach((b, i) => {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = b.n;
+        bookSelect.appendChild(opt);
+      });
+      
+      bookSelect.addEventListener('change', () => {
+        const bk = books[bookSelect.value];
+        chapterSelect.innerHTML = '';
+        for(let i=1; i<=bk.c; i++) {
+          let opt = document.createElement('option');
+          opt.value = i;
+          opt.innerText = "Capítulo " + i;
+          chapterSelect.appendChild(opt);
+        }
+      });
+      
+      // Trigger initial
+      bookSelect.dispatchEvent(new Event('change'));
+      loadChapter();
+    }
+
+    async function loadChapter() {
+      const bookIdx = document.getElementById('book-select').value;
+      const ch = document.getElementById('chapter-select').value;
+      const bookName = books[bookIdx].n;
+      const query = `${bookName} ${ch}`;
+      
+      const contentBox = document.getElementById('bible-content');
+      contentBox.innerHTML = '<div class="loader" style="padding: 60px 0;"><div class="spinner"></div><p style="margin:0;">Cargando Reina Valera Antigua...</p></div>';
+      
+      try {
+        const bgwUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=RVA`;
+        const htmlStr = await fetchWithFallback(bgwUrl);
+        
+        const temp = document.createElement('div');
+        temp.innerHTML = htmlStr;
+        const passage = temp.querySelector('.passage-content') || temp.querySelector('.passage-text');
+        
+        if (passage) {
+          passage.querySelectorAll('.crossreference, .footnote, h1, h2, h3, .publisher-info-bottom').forEach(el => el.remove());
+          
+          let versesData = [];
+          let currentVerseText = "";
+          
+          const textNodes = passage.querySelectorAll('.text');
+          textNodes.forEach(node => {
+             let numSpan = node.querySelector('.versenum') || node.querySelector('.chapternum');
+             let num = "";
+             if (numSpan) {
+                num = numSpan.innerText.trim();
+                numSpan.remove();
+             }
+             
+             let textContent = node.innerText.replace(/\s+/g, ' ').trim();
+             
+             if (num) {
+                if (currentVerseText) versesData.push(currentVerseText.trim());
+                currentVerseText = `[${num}] ${textContent} `;
+             } else {
+                currentVerseText += textContent + " ";
+             }
+          });
+          
+          if (currentVerseText) versesData.push(currentVerseText.trim());
+          
+          if (versesData.length === 0) {
+             let rawPassage = passage.innerText.replace(/\s+/g, ' ').replace(/Read full chapter/gi, '').trim();
+             versesData = [rawPassage];
+          }
+          
+          currentChapterVerses = versesData;
+          
+          let html = `<h2 style="color:#9c4122; border-bottom:2px solid var(--line); padding-bottom:8px;">${bookName} ${ch}</h2><div style="font-size:1.1rem; line-height:1.7;">`;
+          
+          versesData.forEach((v, idx) => {
+             // Extract num from [num]
+             const match = v.match(/^\[(\d+)\]/);
+             const num = match ? match[1] : (idx + 1);
+             const text = v.replace(/^\[\d+\]\s*/, '');
+             
+             html += `<span class="bible-verse" data-idx="${idx}" data-num="${num}" style="cursor:pointer; display:inline; padding: 2px 4px; border-radius:4px; transition:0.2s;">
+                        <sup style="color:#b33914; font-weight:bold; margin-right:4px;">${num}</sup>${text} 
+                      </span>`;
+          });
+          
+          html += `</div><p style="text-align:center; font-size:0.8rem; color:var(--muted); margin-top:32px;">Reina-Valera Antigua (RVA)</p>`;
+          contentBox.innerHTML = html;
+          
+          // Add click events to verses
+          contentBox.querySelectorAll('.bible-verse').forEach(el => {
+             el.addEventListener('click', (e) => {
+                showActionMenu(el, bookName, ch);
+             });
+          });
+          
+        } else {
+          contentBox.innerHTML = `<p style="color:#b33914;">No se pudo cargar el capítulo.</p>`;
+        }
+      } catch (err) {
+        contentBox.innerHTML = `<p style="color:#b33914;">Error de conexión.</p>`;
+      }
+    }
+
+    function showActionMenu(element, bookName, chapterNum) {
+      document.querySelectorAll('.inline-share-box').forEach(el => el.remove());
+      
+      const idx = element.dataset.idx;
+      const vNum = element.dataset.num;
+      const verseFull = currentChapterVerses[idx];
+      const textOnly = verseFull.replace(/^\[\d+\]\s*/, '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const citation = `${bookName} ${chapterNum}:${vNum}`;
+      
+      const box = document.createElement('div');
+      box.className = 'inline-share-box';
+      box.style.cssText = 'display: block; width: 100%; margin-top: 12px; margin-bottom: 16px; background: #fdfaf6; padding: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line); box-sizing: border-box; clear:both;';
+      
+      box.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <p style="margin:0 0 8px 0; font-size:0.9rem; color:#666; font-weight:bold;">${citation}</p>
+          <button class="modal-btn" onclick="speakText(this, '${textOnly}')" style="margin:0; background:white;">🔊 Escuchar Versículo</button>
+          <button class="modal-btn primary" onclick="handleShareInline(this.closest('.inline-share-box'), '${textOnly}', '${citation}')" style="margin:0;">📲 Compartir Imagen</button>
+        </div>
+      `;
+      
+      element.parentNode.insertBefore(box, element.nextSibling);
+    }
+
+    // Funciones Text-To-Speech
+    window.currentUtterance = null;
+    function speakText(btn, text) {
+      const synth = window.speechSynthesis;
+      if (synth.speaking) {
+        synth.cancel();
+        if (window.currentUtterance && window.currentUtterance.text === text) {
+          window.currentUtterance = null;
+          btn.style.opacity = '1';
+          return;
+        }
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.95; 
+      utterance.onend = () => {
+        window.currentUtterance = null;
+        btn.style.opacity = '1';
+      };
+      window.currentUtterance = utterance;
+      btn.style.opacity = '0.7'; 
+      synth.speak(utterance);
+    }
+
+    // Proxy robusto para evitar fallos de conexión
+    async function fetchWithFallback(url) {
+      try {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.contents) return data.contents;
+      } catch(e) {}
+      
+      try {
+        const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+        return await res2.text();
+      } catch(e) {}
+      
+      throw new Error("No proxy available");
+    }
+
+    async function handleShareInline(container, text, citation) {
+      container.innerHTML = '<div class="loader" style="padding: 16px 0; background:white; border-radius:12px; border:1px solid var(--line); margin-top:12px;"><div class="spinner"></div><p style="margin:0;">Generando imagen de alta calidad...</p></div>';
+      
+      try {
+        const blob = await generateImageBlob(text, citation);
+        const file = new File([blob], 'cita_biblica.png', { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              title: 'Cita Bíblica',
+              files: [file]
+            });
+            container.innerHTML = `<p style="color:#0f766e; font-weight:bold; margin-top:16px;">¡Compartido exitosamente!</p>`;
+          } catch (err) {
+            showImageFallbackInline(container, blob, text, citation);
+          }
+        } else {
+          showImageFallbackInline(container, blob, text, citation);
+        }
+      } catch (err) {
+        container.innerHTML = '<p style="color:red; margin-top:16px;">Error al generar la imagen.</p>';
+      }
+    }
+
+    function showImageFallbackInline(container, blob, text, citation) {
+      const url = URL.createObjectURL(blob);
+      const citationText = citation ? ` - ${citation}` : '';
+      const whatsappText = encodeURIComponent(`"${text}"${citationText}\n\n📖 *Biblia RVA 1909*`);
+      
+      container.innerHTML = `
+        <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--line); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+          <p style="font-size: 0.95rem; color: #17211c; margin-top: 0; margin-bottom: 12px; line-height:1.4;">
+            <b>Mantén presionada</b> la imagen para guardarla y subirla a tu estado.
+          </p>
+          <img src="${url}" style="width:100%; max-height:300px; object-fit:contain; border-radius:8px; background:#fdfaf6; border:1px solid #e2e8f0; margin-bottom:16px;" alt="Cita Generada" />
+          
+          <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px; margin-top:0;">O compártelo directamente como texto:</p>
+          <a href="whatsapp://send?text=${whatsappText}" target="_blank" class="modal-btn whatsapp" style="display:flex; justify-content:center; align-items:center; gap:8px;">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg> 
+            Enviar como Texto
+          </a>
+          <a href="${url}" download="cita_biblica.png" class="modal-btn" style="margin-bottom:0;">💾 Descargar Imagen</a>
+        </div>
+      `;
+    }
+
+    async function generateImageBlob(text, citation) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1920;
+        const ctx = canvas.getContext('2d');
+        
+        const pastelGradients = [
+          ['#ffecd2', '#fcb69f'], ['#cfd9df', '#e2ebf0'], ['#a1c4fd', '#c2e9fb'], 
+          ['#fbc2eb', '#a6c1ee'], ['#fdcbf1', '#e6dee9'], ['#a8edea', '#fed6e3'], 
+          ['#e0c3fc', '#8ec5fc'], ['#fdfbfb', '#ebedee'], ['#f5f7fa', '#c3cfe2']
+        ];
+        
+        const gradientColors = pastelGradients[Math.floor(Math.random() * pastelGradients.length)];
+        const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
+        gradient.addColorStop(0, gradientColors[0]);
+        gradient.addColorStop(1, gradientColors[1]);
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1080, 1920);
+        
+        let fontSize = 64;
+        if (text.length > 150) fontSize = 52;
+        if (text.length > 250) fontSize = 42;
+        if (text.length > 400) fontSize = 34;
+        if (text.length > 600) fontSize = 28;
+        
+        ctx.fillStyle = '#17211c';
+        ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+        
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        const maxWidth = 880;
+        
+        for(let n = 0; n < words.length; n++) {
+          let testLine = currentLine + words[n] + ' ';
+          let metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && n > 0) {
+            lines.push(currentLine.trim());
+            currentLine = words[n] + ' ';
+          } else {
+            currentLine = testLine;
+          }
+        }
+        lines.push(currentLine.trim());
+        
+        const lineHeight = fontSize * 1.5;
+        const totalTextHeight = lines.length * lineHeight;
+        const citationHeight = citation ? fontSize * 1.2 + 40 : 0;
+        
+        let startY = (1920 - (totalTextHeight + citationHeight)) / 2;
+        if (startY < 300) startY = 300; 
+        
+        ctx.fillStyle = 'rgba(178, 138, 80, 0.4)';
+        ctx.font = 'bold 160px Georgia';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('“', 540, startY - 100);
+
+        ctx.fillStyle = '#17211c';
+        ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+        for (let i = 0; i < lines.length; i++) {
+          ctx.fillText(lines[i], 540, startY + (i * lineHeight));
+        }
+        
+        if (citation) {
+          ctx.fillStyle = '#b33914';
+          ctx.font = `bold ${Math.max(fontSize * 0.8, 30)}px Inter, sans-serif`;
+          ctx.fillText(citation, 540, startY + totalTextHeight + 60);
+        }
+        
+        ctx.fillStyle = 'rgba(23, 33, 28, 0.6)';
+        ctx.font = '500 36px Inter, sans-serif';
+        ctx.fillText('Reina Valera 1909', 540, 1920 - 150);
+        
+        canvas.toBlob(blob => resolve(blob), 'image/png');
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", initBible););
+    }
+
+    document.addEventListener("DOMContentLoaded", loadAdventechData);
+  </script>
+</body>
+</html>
