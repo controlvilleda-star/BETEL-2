@@ -480,7 +480,7 @@
           }
         } else if (e.target.classList.contains('highlight-pastel')) {
           const textToShare = e.target.innerText;
-          showModal(textToShare, e.target);
+          showModal(textToShare, e.target, day.title);
         }
       });
     }
@@ -526,24 +526,20 @@
     }
 
     // Funciones de Compartir (Totalmente Inline para evitar bugs de iframe)
-    function showModal(textToShare, element) {
+    function showModal(textToShare, element, citation) {
       // Eliminar otros boxes en línea si existen
       document.querySelectorAll('.inline-share-box').forEach(el => el.remove());
       
       const box = document.createElement('div');
       box.className = 'inline-share-box';
-      box.style.cssText = 'margin-top: 12px; margin-bottom: 16px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px;';
+      box.style.cssText = 'display: block; width: 100%; margin-top: 12px; margin-bottom: 16px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line); box-sizing: border-box;';
       
       const safeText = textToShare.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      box.innerHTML = `<button class="modal-btn primary" onclick="handleShareInline(this.closest('.inline-share-box'), '${safeText}', null)" style="margin:0;">📲 Generar Imagen para Estado</button>`;
+      const safeCitation = citation ? citation.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+      box.innerHTML = `<button class="modal-btn primary" onclick="handleShareInline(this.closest('.inline-share-box'), '${safeText}', '${safeCitation}')" style="margin:0; width:100%;">📲 Generar Imagen para Estado</button>`;
       
-      // Encontrar el elemento padre más seguro para insertar (un párrafo o div)
-      const parentBlock = element.closest('p, div, blockquote');
-      if (parentBlock) {
-        parentBlock.parentNode.insertBefore(box, parentBlock.nextSibling);
-      } else {
-        element.parentNode.insertBefore(box, element.nextSibling);
-      }
+      // Insertar justo después de la frase tocada para que no se vaya lejos
+      element.parentNode.insertBefore(box, element.nextSibling);
     }
 
     function openShareSelection(btn, citation) {
