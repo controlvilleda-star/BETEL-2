@@ -222,26 +222,7 @@
     </div>
   </div>
 
-  <script    const books = [
-      { n: "Génesis", c: 50 }, { n: "Éxodo", c: 40 }, { n: "Levítico", c: 27 }, { n: "Números", c: 36 },
-      { n: "Deuteronomio", c: 34 }, { n: "Josué", c: 24 }, { n: "Jueces", c: 21 }, { n: "Rut", c: 4 },
-      { n: "1 Samuel", c: 31 }, { n: "2 Samuel", c: 24 }, { n: "1 Reyes", c: 22 }, { n: "2 Reyes", c: 25 },
-      { n: "1 Crónicas", c: 29 }, { n: "2 Crónicas", c: 36 }, { n: "Esdras", c: 10 }, { n: "Nehemías", c: 13 },
-      { n: "Ester", c: 10 }, { n: "Job", c: 42 }, { n: "Salmos", c: 150 }, { n: "Proverbios", c: 31 },
-      { n: "Eclesiastés", c: 12 }, { n: "Cantares", c: 8 }, { n: "Isaías", c: 66 }, { n: "Jeremías", c: 52 },
-      { n: "Lamentaciones", c: 5 }, { n: "Ezequiel", c: 48 }, { n: "Daniel", c: 12 }, { n: "Oseas", c: 14 },
-      { n: "Joel", c: 3 }, { n: "Amós", c: 9 }, { n: "Abdías", c: 1 }, { n: "Jonás", c: 4 },
-      { n: "Miqueas", c: 7 }, { n: "Nahúm", c: 3 }, { n: "Habacuc", c: 3 }, { n: "Sofonías", c: 3 },
-      { n: "Hageo", c: 2 }, { n: "Zacarías", c: 14 }, { n: "Malaquías", c: 4 }, { n: "Mateo", c: 28 },
-      { n: "Marcos", c: 16 }, { n: "Lucas", c: 24 }, { n: "Juan", c: 21 }, { n: "Hechos", c: 28 },
-      { n: "Romanos", c: 16 }, { n: "1 Corintios", c: 16 }, { n: "2 Corintios", c: 13 }, { n: "Gálatas", c: 6 },
-      { n: "Efesios", c: 6 }, { n: "Filipenses", c: 4 }, { n: "Colosenses", c: 4 }, { n: "1 Tesalonicenses", c: 5 },
-      { n: "2 Tesalonicenses", c: 3 }, { n: "1 Timoteo", c: 6 }, { n: "2 Timoteo", c: 4 }, { n: "Tito", c: 3 },
-      { n: "Filemón", c: 1 }, { n: "Hebreos", c: 13 }, { n: "Santiago", c: 5 }, { n: "1 Pedro", c: 5 },
-      { n: "2 Pedro", c: 3 }, { n: "1 Juan", c: 5 }, { n: "2 Juan", c: 1 }, { n: "3 Juan", c: 1 },
-      { n: "Judas", c: 1 }, { n: "Apocalipsis", c: 22 }
-    ];
-
+    let bibleData = null;
     let currentChapterVerses = [];
 
     function changeLanguage(langCode, btn) {
@@ -255,24 +236,35 @@
       }
     }
 
-    function initBible() {
+    async function initBible() {
+      const contentBox = document.getElementById('bible-content');
+      contentBox.innerHTML = '<div class="loader" style="padding: 60px 0;"><div class="spinner"></div><p style="margin:0;">Cargando Biblia RVA 1909...</p></div>';
+      
+      try {
+        const res = await fetch('./rv1909.json');
+        bibleData = await res.json();
+      } catch (err) {
+        contentBox.innerHTML = '<p style="color:#b33914; text-align:center;">Error al cargar la Biblia local.</p>';
+        return;
+      }
+      
       const bookSelect = document.getElementById('book-select');
       const chapterSelect = document.getElementById('chapter-select');
       
-      books.forEach((b, i) => {
+      bibleData.forEach((b, i) => {
         let opt = document.createElement('option');
         opt.value = i;
-        opt.innerText = b.n;
+        opt.innerText = b.name;
         bookSelect.appendChild(opt);
       });
       
       bookSelect.addEventListener('change', () => {
-        const bk = books[bookSelect.value];
+        const bk = bibleData[bookSelect.value];
         chapterSelect.innerHTML = '';
-        for(let i=1; i<=bk.c; i++) {
+        for(let i=0; i<bk.chapters.length; i++) {
           let opt = document.createElement('option');
           opt.value = i;
-          opt.innerText = "Capítulo " + i;
+          opt.innerText = "Capítulo " + (i + 1);
           chapterSelect.appendChild(opt);
         }
       });
@@ -282,86 +274,36 @@
       loadChapter();
     }
 
-    async function loadChapter() {
+    function loadChapter() {
       const bookIdx = document.getElementById('book-select').value;
-      const ch = document.getElementById('chapter-select').value;
-      const bookName = books[bookIdx].n;
-      const query = `${bookName} ${ch}`;
+      const chIdx = document.getElementById('chapter-select').value;
+      const bookData = bibleData[bookIdx];
+      const bookName = bookData.name;
+      const chapterNum = parseInt(chIdx) + 1;
+      
+      const verses = bookData.chapters[chIdx];
+      currentChapterVerses = verses;
       
       const contentBox = document.getElementById('bible-content');
-      contentBox.innerHTML = '<div class="loader" style="padding: 60px 0;"><div class="spinner"></div><p style="margin:0;">Cargando Reina Valera Antigua...</p></div>';
       
-      try {
-        const bgwUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(query)}&version=RVA`;
-        const htmlStr = await fetchWithFallback(bgwUrl);
-        
-        const temp = document.createElement('div');
-        temp.innerHTML = htmlStr;
-        const passage = temp.querySelector('.passage-content') || temp.querySelector('.passage-text');
-        
-        if (passage) {
-          passage.querySelectorAll('.crossreference, .footnote, h1, h2, h3, .publisher-info-bottom').forEach(el => el.remove());
-          
-          let versesData = [];
-          let currentVerseText = "";
-          
-          const textNodes = passage.querySelectorAll('.text');
-          textNodes.forEach(node => {
-             let numSpan = node.querySelector('.versenum') || node.querySelector('.chapternum');
-             let num = "";
-             if (numSpan) {
-                num = numSpan.innerText.trim();
-                numSpan.remove();
-             }
-             
-             let textContent = node.innerText.replace(/\s+/g, ' ').trim();
-             
-             if (num) {
-                if (currentVerseText) versesData.push(currentVerseText.trim());
-                currentVerseText = `[${num}] ${textContent} `;
-             } else {
-                currentVerseText += textContent + " ";
-             }
-          });
-          
-          if (currentVerseText) versesData.push(currentVerseText.trim());
-          
-          if (versesData.length === 0) {
-             let rawPassage = passage.innerText.replace(/\s+/g, ' ').replace(/Read full chapter/gi, '').trim();
-             versesData = [rawPassage];
-          }
-          
-          currentChapterVerses = versesData;
-          
-          let html = `<h2 style="color:#9c4122; border-bottom:2px solid var(--line); padding-bottom:8px;">${bookName} ${ch}</h2><div style="font-size:1.1rem; line-height:1.7;">`;
-          
-          versesData.forEach((v, idx) => {
-             // Extract num from [num]
-             const match = v.match(/^\[(\d+)\]/);
-             const num = match ? match[1] : (idx + 1);
-             const text = v.replace(/^\[\d+\]\s*/, '');
-             
-             html += `<span class="bible-verse" data-idx="${idx}" data-num="${num}" style="cursor:pointer; display:inline; padding: 2px 4px; border-radius:4px; transition:0.2s;">
-                        <sup style="color:#b33914; font-weight:bold; margin-right:4px;">${num}</sup>${text} 
-                      </span>`;
-          });
-          
-          html += `</div><p style="text-align:center; font-size:0.8rem; color:var(--muted); margin-top:32px;">Reina-Valera Antigua (RVA)</p>`;
-          contentBox.innerHTML = html;
-          
-          // Add click events to verses
-          contentBox.querySelectorAll('.bible-verse').forEach(el => {
-             el.addEventListener('click', (e) => {
-                showActionMenu(el, bookName, ch);
-             });
-          });
-          
-        } else {
-          contentBox.innerHTML = `<p style="color:#b33914;">No se pudo cargar el capítulo.</p>`;
-        }
-      } catch (err) {
-        contentBox.innerHTML = `<p style="color:#b33914;">Error de conexión.</p>`;
-      }
+      let html = `<h2 style="color:#9c4122; border-bottom:2px solid var(--line); padding-bottom:8px;">${bookName} ${chapterNum}</h2><div style="font-size:1.1rem; line-height:1.7;">`;
+      
+      verses.forEach((text, idx) => {
+         const num = idx + 1;
+         html += `<span class="bible-verse" data-idx="${idx}" data-num="${num}" style="cursor:pointer; display:inline; padding: 2px 4px; border-radius:4px; transition:0.2s;">
+                    <sup style="color:#b33914; font-weight:bold; margin-right:4px;">${num}</sup>${text} 
+                  </span>`;
+      });
+      
+      html += `</div><p style="text-align:center; font-size:0.8rem; color:var(--muted); margin-top:32px;">Reina-Valera Antigua (RVA 1909)</p>`;
+      contentBox.innerHTML = html;
+      
+      // Add click events to verses
+      contentBox.querySelectorAll('.bible-verse').forEach(el => {
+         el.addEventListener('click', (e) => {
+            showActionMenu(el, bookName, chapterNum);
+         });
+      });
     }
 
     function showActionMenu(element, bookName, chapterNum) {
@@ -369,8 +311,7 @@
       
       const idx = element.dataset.idx;
       const vNum = element.dataset.num;
-      const verseFull = currentChapterVerses[idx];
-      const textOnly = verseFull.replace(/^\[\d+\]\s*/, '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const textOnly = currentChapterVerses[idx].replace(/'/g, "\\'").replace(/"/g, '&quot;');
       const citation = `${bookName} ${chapterNum}:${vNum}`;
       
       const box = document.createElement('div');
@@ -410,22 +351,6 @@
       window.currentUtterance = utterance;
       btn.style.opacity = '0.7'; 
       synth.speak(utterance);
-    }
-
-    // Proxy robusto para evitar fallos de conexión
-    async function fetchWithFallback(url) {
-      try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
-        if (data.contents) return data.contents;
-      } catch(e) {}
-      
-      try {
-        const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-        return await res2.text();
-      } catch(e) {}
-      
-      throw new Error("No proxy available");
     }
 
     async function handleShareInline(container, text, citation) {
