@@ -509,20 +509,30 @@
       synth.speak(utterance);
     }
 
-    // Proxy robusto para evitar fallos de conexión
+    // Proxy robusto hiper-veloz: Caché + Carrera de Proxies (Promise.any)
     async function fetchWithFallback(url) {
-      try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
-        if (data.contents) return data.contents;
-      } catch(e) {}
+      const cacheKey = 'betel_verse_' + url;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return cached; // Carga en 0 milisegundos si ya se consultó
       
+      // Disparamos 3 proxies simultáneamente. El primero que responda con éxito, gana.
+      const p1 = fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+                 .then(res => res.json())
+                 .then(data => { if(data.contents) return data.contents; throw new Error(); });
+                 
+      const p2 = fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`)
+                 .then(res => res.text());
+                 
+      const p3 = fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`)
+                 .then(res => res.text());
+
       try {
-        const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-        return await res2.text();
-      } catch(e) {}
-      
-      throw new Error("No proxy available");
+        const result = await Promise.any([p1, p2, p3]);
+        try { localStorage.setItem(cacheKey, result); } catch(e) {} // Guardar para el futuro
+        return result;
+      } catch (e) {
+        throw new Error("No hay proxies disponibles");
+      }
     }
 
     // Funciones de Compartir (Totalmente Inline para evitar bugs de iframe)
