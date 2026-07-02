@@ -71,7 +71,7 @@
     }
 
     .lesson-title {
-      color: #9c4122;
+      color: #0052cc;
       font-size: 1.8rem;
       font-weight: 800;
       margin: 0 0 24px 0;
@@ -107,7 +107,7 @@
     
     .sabbath-content h3 {
       font-size: 1.25rem;
-      color: #9c4122;
+      color: #0052cc;
       margin-top: 32px;
       margin-bottom: 16px;
       text-transform: uppercase;
@@ -187,7 +187,7 @@
       margin-top: 12px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--line);
       background: #fdfaf6;
     }
-    .modal-title { margin-top: 0; margin-bottom: 16px; font-size: 1.25rem; color: #9c4122; }
+    .modal-title { margin-top: 0; margin-bottom: 16px; font-size: 1.25rem; color: #0052cc; }
 
     #modal-body {
       overflow-y: auto;
@@ -198,11 +198,11 @@
       position: relative;
       cursor: help;
       border-bottom: 1px dashed var(--muted);
-      color: #9c4122;
+      color: #0052cc;
       font-weight: 600;
       transition: color 0.2s;
     }
-    .strong-tooltip:hover { color: #b33914; }
+    .strong-tooltip:hover { color: #0747a6; }
     .strong-tooltip::after {
       content: attr(data-content);
       position: absolute;
@@ -323,7 +323,7 @@
         renderWidget(currentQ, currentLesson, currentDay, readDetail);
       } catch (err) {
         document.getElementById("widget-root").innerHTML = `
-          <div style="padding: 20px; text-align: center; color: #9c4122;">
+          <div style="padding: 20px; text-align: center; color: #0052cc;">
             <h3>No pudimos cargar la lección de hoy</h3>
             <p>Verifica tu conexión a internet e intenta de nuevo.</p>
           </div>
@@ -388,11 +388,11 @@
       position: relative;
       cursor: help;
       border-bottom: 1px dashed var(--muted);
-      color: #9c4122;
+      color: #0052cc;
       font-weight: 600;
       transition: color 0.2s;
     }
-    .strong-tooltip:hover { color: #b33914; }
+    .strong-tooltip:hover { color: #0747a6; }
     .strong-tooltip::after {
       content: attr(data-content);
       position: absolute;
@@ -559,7 +559,7 @@
               
               box.innerHTML = `
                 <p class="verse-text" onclick="speakText(this, '${textToSpeak}')" title="Toca para escuchar" style="cursor:pointer;">
-                  <span class="highlight-pastel" style="--highlight-color: rgba(253, 186, 116, 0.5); background-size: 100% 100%;">
+                  <span class="highlight-pastel" style="--highlight-color: rgba(153, 194, 255, 0.5); background-size: 100% 100%;">
                     «${finalVerseText}»
                   </span>
                 </p>
