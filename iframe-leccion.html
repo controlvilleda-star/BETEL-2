@@ -536,9 +536,6 @@
               const textToSpeak = versesData.join(' ').replace(/\[\d+\]/g, '').replace(/'/g, "\\'").replace(/"/g, '');
               const citation = rawText.replace(' 🔊', '');
               
-              box.innerHTML = `
-                <p class="verse-text" onclick="speakText(this, '${textToSpeak}')" title="Toca para escuchar" style="cursor:pointer;">
-                  
               // Mini diccionario para tooltip
               const strongDict = {
                 'amor': 'G26 (Ágape) - Amor que busca el bien del otro con entrega.',
@@ -556,10 +553,13 @@
               
               let finalVerseText = versesData.join(' ');
               Object.keys(strongDict).forEach(key => {
-                const regex = new RegExp(`\\b(${key})\\b`, 'gi');
-                finalVerseText = finalVerseText.replace(regex, `<span class="strong-tooltip" data-content="${strongDict[key]}">$1</span>`);
+                const regex = new RegExp('\\b(' + key + ')\\b', 'gi');
+                finalVerseText = finalVerseText.replace(regex, '<span class="strong-tooltip" data-content="' + strongDict[key] + '">$1</span>');
               });
-<span class="highlight-pastel" style="--highlight-color: rgba(253, 186, 116, 0.5); background-size: 100% 100%;">
+              
+              box.innerHTML = `
+                <p class="verse-text" onclick="speakText(this, '${textToSpeak}')" title="Toca para escuchar" style="cursor:pointer;">
+                  <span class="highlight-pastel" style="--highlight-color: rgba(253, 186, 116, 0.5); background-size: 100% 100%;">
                     «${finalVerseText}»
                   </span>
                 </p>
