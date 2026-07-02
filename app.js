@@ -2935,3 +2935,15 @@ function syncIcons() {
     window.lucide.createIcons();
   }
 }
+
+
+// Setup BroadcastChannel to listen for commands from sibling iframes (like iframe-leccion)
+const betelChannel = new BroadcastChannel('betel_channel');
+betelChannel.onmessage = (event) => {
+  if (event.data && event.data.action === 'openStrongTab') {
+    const lexicoBtn = document.querySelector('[data-tab="lexico"]');
+    if (lexicoBtn) {
+      lexicoBtn.click();
+    }
+  }
+};
