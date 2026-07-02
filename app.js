@@ -1760,6 +1760,7 @@ const seedData = {
   ]
 };
 
+const egwThemes = [];
 const state = {
   activeTab: "explorar",
   mode: "beginner",
@@ -2005,7 +2006,7 @@ function renderEntryCard(entry, isActive) {
         <span class="language-chip">${escapeHtml(entry.language)}</span>
       </span>
       <span class="entry-title">
-        <strong>${escapeHtml(entry.lemma)}</strong>
+        <strong>${escapeHtml(entry.lemma)}</strong> ${entry.isNew ? '<span class="mini-chip" style="background:#e0e5ec;color:#2684ff;border:1px solid #c8d8e4;font-size:0.7em;margin-left:5px;border-radius:4px;padding:1px 4px;">NUEVO</span>' : ''}
         <span>${escapeHtml(entry.transliteration)} · ${escapeHtml(entry.original)}</span>
       </span>
       <span class="muted">${escapeHtml(entry.short)}</span>
@@ -2035,7 +2036,7 @@ function renderEntryDetail(entry) {
             <div>
               <span class="strong-chip ${entry.language === "Hebreo" ? "hebrew" : ""}">${escapeHtml(entry.id)}</span>
               <div class="original-word" lang="${entry.language === "Hebreo" ? "he" : "el"}">${escapeHtml(entry.original)}</div>
-              <h1>${escapeHtml(entry.lemma)}</h1>
+              <h1>${escapeHtml(entry.lemma)} ${entry.isNew ? '<span class="mini-chip" style="background:#e0e5ec;color:#2684ff;border:1px solid #c8d8e4;font-size:0.4em;vertical-align:middle;margin-left:8px;border-radius:4px;padding:2px 8px;">NUEVO</span>' : ''}</h1>
               <div class="detail-subtitle">${escapeHtml(entry.transliteration)} · ${escapeHtml(entry.pronunciation)} · ${escapeHtml(entry.language)}</div>
             </div>
             <div class="detail-actions">
@@ -2376,7 +2377,7 @@ function renderSchoolWord(entry) {
         <span class="strong-chip ${entry.language === "Hebreo" ? "hebrew" : ""}">${escapeHtml(entry.id)}</span>
         <span class="language-chip">${escapeHtml(entry.language)}</span>
       </span>
-      <strong>${escapeHtml(entry.lemma)}</strong>
+      <strong>${escapeHtml(entry.lemma)}</strong> ${entry.isNew ? '<span class="mini-chip" style="background:#e0e5ec;color:#2684ff;border:1px solid #c8d8e4;font-size:0.7em;margin-left:5px;border-radius:4px;padding:1px 4px;">NUEVO</span>' : ''}
       <span>${escapeHtml(entry.transliteration)} · ${escapeHtml(entry.original)}</span>
       <p>${escapeHtml(entry.beginner)}</p>
       <small>EGW: ${escapeHtml(egw.reference)}</small>
