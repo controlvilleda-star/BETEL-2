@@ -1,24 +1,27 @@
 :root {
   color-scheme: light;
-  --bg: #f7faf8;
-  --surface: #ffffff;
-  --surface-soft: #eef7f3;
-  --surface-warm: #fff7ed;
-  --surface-blue: #eef5ff;
-  --ink: #17211c;
-  --muted: #66756e;
-  --line: #dbe5df;
-  --strong: #0f766e;
-  --strong-dark: #105f59;
-  --gold: #a16207;
+  --bg: #e0e5ec;
+  --surface: #e0e5ec;
+  --surface-soft: #d1d9e6;
+  --surface-warm: #ecf0f3;
+  --surface-blue: #c8d8e4;
+  --ink: #2d4263;
+  --muted: #6b7c93;
+  --line: transparent;
+  --strong: #0052cc;
+  --strong-dark: #0747a6;
+  --gold: #b37700;
   --coral: #c2410c;
-  --blue: #2563eb;
+  --blue: #2684ff;
   --danger: #b91c1c;
-  --shadow: 0 16px 36px rgba(31, 45, 38, 0.1);
-  --radius: 8px;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  
+  --neu-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+  --neu-shadow-hover: 4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.5);
+  --neu-inner: inset 6px 6px 10px rgba(163, 177, 198, 0.6), inset -6px -6px 10px rgba(255, 255, 255, 0.5);
+  
+  --shadow: var(--neu-shadow);
+  --radius: 16px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * {
@@ -56,7 +59,7 @@ button {
   gap: 16px;
   align-items: center;
   padding: 16px clamp(16px, 3vw, 34px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: none;
   background: rgba(247, 250, 248, 0.94);
   backdrop-filter: blur(12px);
 }
@@ -109,10 +112,10 @@ button {
   min-width: 0;
   height: 46px;
   padding: 0 8px 0 14px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 1px 0 rgba(23, 33, 28, 0.04);
+  box-shadow: var(--neu-inner);
 }
 
 .search-box:focus-within {
@@ -155,7 +158,7 @@ button {
   grid-template-columns: 1fr 1fr;
   min-width: 180px;
   padding: 3px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: #edf3f0;
 }
@@ -187,6 +190,8 @@ button {
 }
 
 .icon-button {
+  box-shadow: var(--neu-shadow);
+  transition: all 0.2s ease;
   display: inline-grid;
   width: 40px;
   height: 40px;
@@ -197,6 +202,11 @@ button {
 }
 
 .icon-button:hover,
+.secondary-button:hover,
+.text-button:hover {
+  box-shadow: var(--neu-inner);
+}
+.icon-button:active {
 .secondary-button:hover,
 .text-button:hover {
   border-color: #b9c9c0;
@@ -213,7 +223,7 @@ button {
   display: flex;
   gap: 8px;
   padding: 10px clamp(16px, 3vw, 34px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: none;
   background: var(--surface);
   overflow-x: auto;
 }
@@ -251,11 +261,12 @@ button {
 }
 
 .side-block {
-  border: 1px solid var(--line);
+  box-shadow: var(--neu-shadow);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
   padding: 16px;
-  box-shadow: 0 1px 0 rgba(23, 33, 28, 0.03);
+  box-shadow: var(--neu-shadow);
 }
 
 .side-block.compact {
@@ -323,7 +334,7 @@ button {
 .stat {
   min-width: 0;
   padding: 10px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: #fbfdfc;
 }
@@ -355,8 +366,9 @@ button {
 select,
 textarea,
 .note-input {
+  box-shadow: var(--neu-inner);
   width: 100%;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--ink);
@@ -384,10 +396,10 @@ select {
 }
 
 .module {
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 1px 0 rgba(23, 33, 28, 0.03);
+  box-shadow: var(--neu-shadow);
 }
 
 .module-head {
@@ -431,13 +443,29 @@ select {
 .lexicon-row,
 .saved-row,
 .lesson-row {
+  box-shadow: var(--neu-shadow);
+  transition: all 0.3s ease;
+}
+.result-card,
+.verse-card,
+.lexicon-row,
+.saved-row,
+.lesson-row {
   width: 100%;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
   text-align: left;
 }
 
+.result-card,
+.verse-card,
+.lexicon-row,
+.saved-row,
+.lesson-row {
+  box-shadow: var(--neu-shadow);
+  transition: all 0.3s ease;
+}
 .result-card,
 .lexicon-row,
 .saved-row,
@@ -516,7 +544,7 @@ select {
 .tag,
 .mini-chip {
   padding: 0 8px;
-  border: 1px solid var(--line);
+  border: none;
   background: #fbfdfc;
   color: var(--muted);
   font-size: 0.72rem;
@@ -579,7 +607,7 @@ select {
 .insight {
   min-width: 0;
   padding: 14px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: #fbfdfc;
 }
@@ -643,7 +671,7 @@ select {
   gap: 5px;
   min-height: 30px;
   padding: 0 8px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: #fbfdfc;
   color: var(--ink);
@@ -678,6 +706,8 @@ select {
 .text-button,
 .secondary-button,
 .primary-button {
+  box-shadow: var(--neu-shadow);
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -700,12 +730,15 @@ select {
 }
 
 .primary-button {
+  box-shadow: var(--neu-shadow);
+  transition: all 0.2s ease;
   border-color: var(--strong-dark);
   background: var(--strong);
   color: white;
 }
 
 .primary-button:hover {
+  box-shadow: var(--neu-inner);
   background: var(--strong-dark);
 }
 
@@ -775,7 +808,7 @@ select {
   gap: 16px;
   min-height: 280px;
   padding: 22px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
 }
@@ -805,7 +838,7 @@ select {
 }
 
 .compare-card {
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   padding: 14px;
   background: #fbfdfc;
@@ -875,7 +908,7 @@ select {
 .egw-mini,
 .daily-summary {
   border-radius: var(--radius);
-  border: 1px solid var(--line);
+  border: none;
 }
 
 .egw-mini {
@@ -942,7 +975,7 @@ select {
   gap: 8px;
   width: 100%;
   padding: 13px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: var(--surface);
   text-align: left;
@@ -975,7 +1008,7 @@ select {
 
 .share-card-frame {
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius);
   background: #f8fbf9;
 }
