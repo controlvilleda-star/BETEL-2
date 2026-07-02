@@ -1378,6 +1378,53 @@ const seedData = {
       ],
       "caution": "La profecía bíblica enfatiza el proclamar (dar a conocer) más que el predecir (adivinar).",
       "isNew": true
+    },
+    {
+      "id": "H60",
+      "language": "Hebreo",
+      "original": "אֵבֶל",
+      "transliteration": "ebel",
+      "pronunciation": "e-bel",
+      "lemma": "duelo",
+      "short": "Duelo, luto, lamentación.",
+      "definition": "Estado de luto o lamento, generalmente por la muerte de alguien, o como señal de arrepentimiento profundo.",
+      "beginner": "Es la tristeza profunda que sentimos cuando alguien muere o pasa algo muy grave.",
+      "advanced": "Sustantivo masculino. Se asocia a menudo con ritos externos de lamentación (rasgar las vestiduras, cilicio).",
+      "morphology": "sustantivo masculino",
+      "tags": [
+        "duelo",
+        "luto",
+        "tristeza",
+        "lamento"
+      ],
+      "related": [
+        "H56"
+      ],
+      "caution": "A diferencia del pesar moderno que suele ser interno, el ebel bíblico era visible y público.",
+      "isNew": true
+    },
+    {
+      "id": "G3968",
+      "language": "Griego",
+      "original": "πένθος",
+      "transliteration": "penthos",
+      "pronunciation": "pen-thos",
+      "lemma": "lamento",
+      "short": "Duelo, tristeza profunda, lamento.",
+      "definition": "Duelo, llanto apasionado. Se utiliza a menudo para describir la aflicción extrema por la pérdida de una vida.",
+      "beginner": "Un dolor muy profundo que nos hace llorar de tristeza.",
+      "advanced": "Sustantivo neutro. Es el dolor que se apodera de toda la persona y no puede ocultarse.",
+      "morphology": "sustantivo neutro",
+      "tags": [
+        "duelo",
+        "llanto",
+        "tristeza"
+      ],
+      "related": [
+        "G3996"
+      ],
+      "caution": "En el Apocalipsis, Dios promete que ya no habrá más penthos (llanto/duelo).",
+      "isNew": true
     }
   ],
   "verses": [
@@ -1761,6 +1808,26 @@ const seedData = {
 };
 
 const egwThemes = [];
+
+if (typeof window.sabbathSchool === 'undefined') {
+  window.sabbathSchool = { 
+    weekRange: "Sin conexión", 
+    title: "Lección no disponible", 
+    memoryText: "No se pudo cargar la base de datos de la escuela sabática. Revisa que el archivo de datos esté presente.", 
+    memoryRef: "Error 404", 
+    egwFocus: { reference: "Nota", quote: "No hay conexión.", note: "Revisa tu red." }, 
+    days: [{ 
+      date: new Date().toISOString().split('T')[0], 
+      label: "Sábado", 
+      title: "No disponible", 
+      reading: "Ninguna", 
+      text: "La lección no ha cargado correctamente.", 
+      words: [] 
+    }] 
+  };
+}
+const sabbathSchool = window.sabbathSchool;
+
 const state = {
   activeTab: "explorar",
   mode: "beginner",
