@@ -207,6 +207,9 @@ button {
   box-shadow: var(--neu-inner);
 }
 .icon-button:active {
+  box-shadow: var(--neu-active);
+}
+
 .secondary-button:hover,
 .text-button:hover {
   border-color: #b9c9c0;

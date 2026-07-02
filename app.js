@@ -1924,7 +1924,24 @@ function handleAction(event) {
     }
   }
 
-  if (action === "toggle-entry-favorite") {
+  
+    if (action === "share-entry") {
+      const entry = findEntry(target.dataset.id);
+      if (!entry) return;
+      const shareText = `${entry.lemma} (${entry.id}) - ${entry.original}\n${entry.transliteration} [${entry.language}]\n\n${entry.definition}\n\nClaros Strong — https://controlvilleda-star.github.io/BETEL-2/`;
+      if (navigator.share) {
+        navigator.share({ title: entry.lemma + " — Claros Strong", text: shareText }).catch(() => {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareText).then(() => {
+          const btn = target.closest("button") || target;
+          btn.title = "¡Copiado!";
+          setTimeout(() => { btn.title = "Compartir ficha"; }, 2000);
+        });
+      }
+      return;
+    }
+
+    if (action === "toggle-entry-favorite") {
     toggleInList(state.favorites.entries, control.dataset.id);
     saveJson(STORAGE_KEYS.favorites, state.favorites);
   }
@@ -2112,6 +2129,9 @@ function renderEntryDetail(entry) {
               </button>
               <button class="icon-button" data-action="add-compare" data-id="${escapeHtml(entry.id)}" aria-label="${inCompare ? "Ya esta en comparar" : "Comparar"}" title="${inCompare ? "Ya esta en comparar" : "Comparar"}">
                 <i data-lucide="${inCompare ? "square-check" : "scale"}"></i>
+              </button>
+              <button class="icon-button" data-action="share-entry" data-id="${escapeHtml(entry.id)}" aria-label="Compartir ficha" title="Compartir ficha">
+                <i data-lucide="share-2"></i>
               </button>
             </div>
           </div>
@@ -2829,7 +2849,13 @@ function entryMatches(entry, query) {
       ...(entry.related || []),
     ].join(" ")
   );
-  return haystack.includes(query);
+  if (query.length <= 2) return haystack.includes(query);
+  try {
+    const re = new RegExp("(?:^|\\s|[.,;:!?()\\-])" + query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    return re.test(haystack);
+  } catch (e) {
+    return haystack.includes(query);
+  }
 }
 
 function versesForEntry(entryId) {

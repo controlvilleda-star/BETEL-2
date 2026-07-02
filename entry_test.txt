@@ -1,0 +1,21 @@
+{
+      id: "G26",
+      language: "Griego",
+      original: "ἀγάπη",
+      transliteration: "agape",
+      pronunciation: "a-ga-pe",
+      lemma: "amor",
+      short: "Amor que busca el bien del otro con entrega y fidelidad.",
+      definition:
+        "Amor decidido, relacional y activo. En el Nuevo Testamento suele describir el amor de Dios y el amor que forma a la comunidad cristiana.",
+      beginner:
+        "No es solo emocion. Es amor que se mueve hacia el bien del otro, aun cuando cuesta.",
+      advanced:
+        "Sustantivo femenino. Se distingue del simple afecto por su orientacion activa, covenantal y comunitaria.",
+      morphology: "sustantivo femenino",
+      tags: ["amor", "entrega", "comunidad"],
+      related: ["G25", "G5485", "H2617"],
+      caution:
+        "Evita convertirla en una definicion unica y rigida; el contexto decide el matiz.",
+      starter: true,
+    }
